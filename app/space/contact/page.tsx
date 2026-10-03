@@ -2,8 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { useLanguage } from '../../context/LanguageContext'
-
+import { useLanguage } from '@/context/LanguageContext'
 interface Platform {
   key: string
   titleEn: string
