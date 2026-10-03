@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
-import { useLanguage } from '../../context/LanguageContext'
+import { useLanguage } from '@/context/LanguageContext'
 
 /* ============================================================
    SVG ICONS
