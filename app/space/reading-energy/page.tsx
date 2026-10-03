@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
+import * as Astronomy from 'astronomy-engine'
 
 /* ============================================================
    SVG ICONS
@@ -202,33 +203,92 @@ const numerologyMeanings: Record<number, { en: string; ar: string; themeEn: stri
   7: { en: 'Introspection, wisdom, mystery', ar: 'التأمل، الحكمة، الغموض', themeEn: 'Go inward.', themeAr: 'اتجه إلى الداخل.', chakra: 'Third Eye' },
   8: { en: 'Power, karma, material mastery', ar: 'القوة، الكارما، الإتقان المادي', themeEn: 'Own your authority.', themeAr: 'امتلك سلطتك.', chakra: 'Solar Plexus' },
   9: { en: 'Completion, release, wisdom', ar: 'الإكمال، التحرير، الحكمة', themeEn: 'Close a chapter.', themeAr: 'أغلق فصلاً.', chakra: 'Crown' },
+  11: { en: 'Intuition, illumination, spiritual messenger', ar: 'الحدس، الإشراق، الرسالة الروحية', themeEn: 'Trust the signal.', themeAr: 'ثق بالإشارة.', chakra: 'Third Eye' },
+  22: { en: 'Master builder, vision made tangible', ar: 'البنّاء الأكبر، تحويل الرؤية إلى واقع', themeEn: 'Build the vision.', themeAr: 'ابنِ الرؤية.', chakra: 'Crown' },
 }
 
 /* ============================================================
-   HELPERS
+   DAILY ORACLE ENGINE
+   Astronomy Engine provides the astronomical layer.
+   The interpretation layer below is symbolic/astrological.
    ============================================================ */
-function seedFromDate(date: Date): number {
-  return (date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()) % 2147483647
+const SIGNS_EN = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'] as const
+const SIGNS_AR = ['الحمل', 'الثور', 'الجوزاء', 'السرطان', 'الأسد', 'العذراء', 'الميزان', 'العقرب', 'القوس', 'الجدي', 'الدلو', 'الحوت'] as const
+
+type Language = 'en' | 'ar'
+type PlanetId = 'sun' | 'moon' | 'mercury' | 'venus' | 'mars' | 'jupiter' | 'saturn' | 'uranus' | 'neptune' | 'pluto'
+
+type PlanetReading = {
+  id: PlanetId
+  name: string
+  sign: string
+  degree: number
+  minute: number
+  longitude: number
+  retrograde: boolean
 }
 
-function mulberry32(seed: number) {
-  return function () {
-    let t = (seed += 0x6d2b79f5)
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
+type Aspect = {
+  a: PlanetReading
+  b: PlanetReading
+  type: string
+  angle: number
+  orb: number
+  strength: number
 }
 
-// REAL Moon phase calculation
+const PLANETS: { id: PlanetId; body: Astronomy.Body; en: string; ar: string }[] = [
+  { id: 'sun', body: Astronomy.Body.Sun, en: 'Sun', ar: 'الشمس' },
+  { id: 'moon', body: Astronomy.Body.Moon, en: 'Moon', ar: 'القمر' },
+  { id: 'mercury', body: Astronomy.Body.Mercury, en: 'Mercury', ar: 'عطارد' },
+  { id: 'venus', body: Astronomy.Body.Venus, en: 'Venus', ar: 'الزهرة' },
+  { id: 'mars', body: Astronomy.Body.Mars, en: 'Mars', ar: 'المريخ' },
+  { id: 'jupiter', body: Astronomy.Body.Jupiter, en: 'Jupiter', ar: 'المشتري' },
+  { id: 'saturn', body: Astronomy.Body.Saturn, en: 'Saturn', ar: 'زحل' },
+  { id: 'uranus', body: Astronomy.Body.Uranus, en: 'Uranus', ar: 'أورانوس' },
+  { id: 'neptune', body: Astronomy.Body.Neptune, en: 'Neptune', ar: 'نبتون' },
+  { id: 'pluto', body: Astronomy.Body.Pluto, en: 'Pluto', ar: 'بلوتو' },
+]
+
+const norm360 = (x: number) => ((x % 360) + 360) % 360
+const angularDistance = (a: number, b: number) => {
+  const d = Math.abs(norm360(a) - norm360(b))
+  return Math.min(d, 360 - d)
+}
+
+function getLongitude(id: PlanetId, date: Date): number {
+  const time = Astronomy.MakeTime(date)
+  if (id === 'sun') return norm360(Astronomy.SunPosition(time).elon)
+  if (id === 'moon') return norm360(Astronomy.EclipticGeoMoon(time).lon)
+
+  const body = PLANETS.find(p => p.id === id)!.body
+  const vector = Astronomy.GeoVector(body, time, Astronomy.Aberration.Corrected)
+  return norm360(Astronomy.EquatorialToEcliptic(vector).elon)
+}
+
+function isRetrograde(id: PlanetId, date: Date): boolean {
+  if (id === 'sun' || id === 'moon') return false
+  const before = getLongitude(id, new Date(date.getTime() - 6 * 60 * 60 * 1000))
+  const after = getLongitude(id, new Date(date.getTime() + 6 * 60 * 60 * 1000))
+  let delta = after - before
+  if (delta > 180) delta -= 360
+  if (delta < -180) delta += 360
+  return delta < 0
+}
+
+function longitudeParts(longitude: number) {
+  const signIndex = Math.floor(norm360(longitude) / 30)
+  const within = norm360(longitude) - signIndex * 30
+  return { signIndex, degree: Math.floor(within), minute: Math.round((within - Math.floor(within)) * 60) }
+}
+
 function getMoonPhase(date: Date): number {
-  const knownNewMoon = new Date(Date.UTC(2000, 0, 6, 18, 14)).getTime()
-  const lunarCycle = 29.530588853 * 24 * 60 * 60 * 1000
-  const elapsed = date.getTime() - knownNewMoon
-  return ((elapsed % lunarCycle) / lunarCycle + 1) % 1
+  // Astronomy Engine returns geocentric Moon-Sun ecliptic separation:
+  // 0=new, 90=first quarter, 180=full, 270=last quarter.
+  return norm360(Astronomy.MoonPhase(Astronomy.MakeTime(date))) / 360
 }
 
-function getMoonPhaseName(phase: number, lang: 'en' | 'ar') {
+function getMoonPhaseName(phase: number, lang: Language) {
   const idx = Math.floor((phase * 8 + 0.5) % 8)
   const names = lang === 'en'
     ? ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent']
@@ -236,146 +296,193 @@ function getMoonPhaseName(phase: number, lang: 'en' | 'ar') {
   return names[idx]
 }
 
-function getZodiacSeason(date: Date, lang: 'en' | 'ar') {
-  const m = date.getMonth() + 1
-  const d = date.getDate()
-  const seasons = lang === 'en'
-    ? [['Capricorn', 12, 22, 1, 19], ['Aquarius', 1, 20, 2, 18], ['Pisces', 2, 19, 3, 20], ['Aries', 3, 21, 4, 19], ['Taurus', 4, 20, 5, 20], ['Gemini', 5, 21, 6, 20], ['Cancer', 6, 21, 7, 22], ['Leo', 7, 23, 8, 22], ['Virgo', 8, 23, 9, 22], ['Libra', 9, 23, 10, 22], ['Scorpio', 10, 23, 11, 21], ['Sagittarius', 11, 22, 12, 21]]
-    : [['الجدي', 12, 22, 1, 19], ['الدلو', 1, 20, 2, 18], ['الحوت', 2, 19, 3, 20], ['الحمل', 3, 21, 4, 19], ['الثور', 4, 20, 5, 20], ['الجوزاء', 5, 21, 6, 20], ['السرطان', 6, 21, 7, 22], ['الأسد', 7, 23, 8, 22], ['العذراء', 8, 23, 9, 22], ['الميزان', 9, 23, 10, 22], ['العقرب', 10, 23, 11, 21], ['القوس', 11, 22, 12, 21]]
-  for (const s of seasons) {
-    const [name, sm, sd, em, ed] = s as [string, number, number, number, number]
-    if ((m === sm && d >= sd) || (m === em && d <= ed)) return name
-  }
-  return lang === 'en' ? 'Capricorn' : 'الجدي'
+function getZodiacSeason(date: Date, lang: Language) {
+  const longitude = getLongitude('sun', date)
+  const index = Math.floor(longitude / 30)
+  return lang === 'en' ? SIGNS_EN[index] : SIGNS_AR[index]
 }
 
-function getDayRuler(date: Date, lang: 'en' | 'ar') {
+function getDayRuler(date: Date, lang: Language) {
   const rulers = lang === 'en'
     ? ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn']
     : ['الشمس', 'القمر', 'المريخ', 'عطارد', 'المشتري', 'الزهرة', 'زحل']
   return rulers[date.getDay()]
 }
 
-/* ============================================================
-   REAL PLANETARY POSITIONS (Mean Longitude Approximations)
-   Based on J2000.0 reference and mean daily motion of each planet
-   ============================================================ */
-function getPlanets(date: Date, lang: 'en' | 'ar') {
-  // Days since J2000.0 (January 1, 2000, 12:00 UTC)
-  const J2000 = Date.UTC(2000, 0, 1, 12, 0, 0)
-  const daysSinceJ2000 = (date.getTime() - J2000) / (1000 * 60 * 60 * 24)
-
-  // Planet: mean longitude at J2000 (deg) + mean daily motion (deg/day)
-  // Values from standard astronomical ephemeris references
-  const planetData = [
-    { id: 'sun',     nameEn: 'Sun',                 nameAr: 'الشمس',           L0: 280.4643, rate: 0.9856474 },
-    { id: 'moon',    nameEn: 'Moon',                nameAr: 'القمر',           L0: 218.3164, rate: 13.1763965 },
-    { id: 'mercury', nameEn: 'Mercury',             nameAr: 'عطارد',          L0: 252.2503, rate: 4.09233443 },
-    { id: 'venus',   nameEn: 'Venus',               nameAr: 'الزهرة',          L0: 181.9791, rate: 1.60213034 },
-    { id: 'mars',    nameEn: 'Mars',                nameAr: 'المريخ',          L0: 355.4330, rate: 0.52402076 },
-    { id: 'jupiter', nameEn: 'Jupiter',             nameAr: 'المشتري',         L0: 34.3515,  rate: 0.08308529 },
-    { id: 'saturn',  nameEn: 'Saturn',              nameAr: 'زحل',             L0: 50.0774,  rate: 0.03344414 },
-    { id: 'uranus',  nameEn: 'Uranus',              nameAr: 'أورانوس',         L0: 314.0550, rate: 0.01172834 },
-    { id: 'neptune', nameEn: 'Neptune',             nameAr: 'نبتون',           L0: 304.3487, rate: 0.00598103 },
-    { id: 'pluto',   nameEn: 'Pluto',               nameAr: 'بلوتو',           L0: 238.9288, rate: 0.00396476 },
-  ]
-
-  const signsEn = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
-  const signsAr = ['الحمل', 'الثور', 'الجوزاء', 'السرطان', 'الأسد', 'العذراء', 'الميزان', 'العقرب', 'القوس', 'الجدي', 'الدلو', 'الحوت']
-
-  // Retrograde windows — month/day pairs when planet is typically retrograde
-  const retrogradeWindows: Record<string, [number, number, number, number][]> = {
-    mercury: [[1, 1, 1, 26], [4, 21, 5, 15], [8, 16, 9, 9], [12, 1, 12, 26]],
-    venus:   [[3, 1, 4, 15], [10, 15, 11, 15]], // approx every 18 months
-    mars:    [[10, 30, 12, 13], [6, 15, 8, 20]], // every ~2 years
-    jupiter: [[9, 4, 12, 31], [1, 1, 2, 4]],
-    saturn:  [[5, 1, 9, 15]],
-    uranus:  [[7, 15, 12, 15]],
-    neptune: [[6, 20, 11, 25]],
-    pluto:   [[4, 20, 10, 10]],
-  }
-
-  const isRetrograde = (planetId: string, d: Date): boolean => {
-    const w = retrogradeWindows[planetId]
-    if (!w) return false
-    const m = d.getMonth() + 1
-    const day = d.getDate()
-    return w.some(([sm, sd, em, ed]) => {
-      if (sm <= em) {
-        return (m === sm && day >= sd) || (m === em && day <= ed) || (m > sm && m < em)
-      }
-      // Crosses year boundary
-      return (m === sm && day >= sd) || (m === em && day <= ed) || m > sm || m < em
-    })
-  }
-
-  return planetData.map((p) => {
-    let L = (p.L0 + p.rate * daysSinceJ2000) % 360
-    if (L < 0) L += 360
-
-    const signIndex = Math.floor(L / 30)
-    const degree = Math.floor(L % 30)
-
-    const isRetro = p.id !== 'sun' && p.id !== 'moon' && isRetrograde(p.id, date)
-
+function getPlanets(date: Date, lang: Language): PlanetReading[] {
+  return PLANETS.map(p => {
+    const longitude = getLongitude(p.id, date)
+    const { signIndex, degree, minute } = longitudeParts(longitude)
     return {
-      name: lang === 'en' ? p.nameEn : p.nameAr,
-      sign: lang === 'en' ? signsEn[signIndex] : signsAr[signIndex],
-      retrograde: isRetro,
+      id: p.id,
+      name: lang === 'en' ? p.en : p.ar,
+      sign: lang === 'en' ? SIGNS_EN[signIndex] : SIGNS_AR[signIndex],
       degree,
+      minute,
+      longitude,
+      retrograde: isRetrograde(p.id, date),
     }
   })
 }
 
-function getPortal(date: Date, lang: 'en' | 'ar') {
-  const day = date.getDate()
-  const month = date.getMonth() + 1
+const ASPECT_DEFS = [
+  { angle: 0, orb: 8, en: 'Conjunction', ar: 'اقتران' },
+  { angle: 60, orb: 5, en: 'Sextile', ar: 'تسديس' },
+  { angle: 90, orb: 7, en: 'Square', ar: 'تربيع' },
+  { angle: 120, orb: 7, en: 'Trine', ar: 'تثليث' },
+  { angle: 180, orb: 8, en: 'Opposition', ar: 'مقابلة' },
+]
+
+function getAspects(planets: PlanetReading[], lang: Language): Aspect[] {
+  const aspects: Aspect[] = []
+  for (let i = 0; i < planets.length; i++) {
+    for (let j = i + 1; j < planets.length; j++) {
+      const a = planets[i]
+      const b = planets[j]
+      const separation = angularDistance(a.longitude, b.longitude)
+      for (const def of ASPECT_DEFS) {
+        const orb = Math.abs(separation - def.angle)
+        if (orb <= def.orb) {
+          const strength = 1 - orb / def.orb
+          aspects.push({
+            a, b,
+            type: lang === 'en' ? def.en : def.ar,
+            angle: def.angle,
+            orb,
+            strength,
+          })
+          break
+        }
+      }
+    }
+  }
+  return aspects.sort((x, y) => y.strength - x.strength).slice(0, 8)
+}
+
+function getElement(signIndex: number) {
+  return ['fire', 'earth', 'air', 'water'][signIndex % 4]
+}
+
+function getEnergyWeather(planets: PlanetReading[], aspects: Aspect[], phase: number, lang: Language) {
+  let score = 50
+  const moon = planets.find(p => p.id === 'moon')!
+  const sun = planets.find(p => p.id === 'sun')!
+
+  // Lunation intensity: New/Full Moon are treated as higher symbolic intensity.
+  const phaseAngle = phase * 360
+  const lunationDistance = Math.min(phaseAngle, Math.abs(phaseAngle - 180), Math.abs(phaseAngle - 360))
+  if (lunationDistance < 12) score += 15
+  else if (lunationDistance < 25) score += 7
+
+  // Close major aspects increase activity; exact strength is based on orb.
+  score += aspects.slice(0, 5).reduce((sum, a) => sum + Math.round(a.strength * 5), 0)
+
+  // Retrogrades are interpreted as inward/review energy rather than simply "bad" energy.
+  const retrogrades = planets.filter(p => p.retrograde).length
+  score += Math.min(10, retrogrades * 2)
+
+  // Element balance: Moon/Sun/inner planets carry more weight.
+  const weighted = planets.filter(p => ['sun', 'moon', 'mercury', 'venus', 'mars'].includes(p.id))
+  const counts = weighted.reduce<Record<string, number>>((acc, p) => {
+    const element = getElement(Math.floor(p.longitude / 30))
+    acc[element] = (acc[element] || 0) + 1
+    return acc
+  }, {})
+  const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0]
+  if (dominant === 'fire') score += 7
+  if (dominant === 'water') score += 3
+
+  // Cancer/Capricorn-style cardinal Moon is still dynamic; this keeps Moon relevant without inventing physics.
+  if (['Aries', 'Cancer', 'Libra', 'Capricorn'].includes(moon.sign)) score += 3
+  if (['Aries', 'Leo', 'Sagittarius'].includes(sun.sign)) score += 2
+
+  score = Math.max(0, Math.min(100, score))
+
+  let levelEn: string
+  let levelAr: string
+  let phraseEn: string
+  let phraseAr: string
+
+  if (score >= 76) {
+    levelEn = 'Intense'; levelAr = 'مكثفة'
+    phraseEn = 'The sky is symbolically active. Move deliberately, and give strong impulses a conscious direction.'
+    phraseAr = 'السماء نشطة رمزياً. تحرّك بوعي، وامنح الدوافع القوية اتجاهاً مقصوداً.'
+  } else if (score >= 56) {
+    levelEn = 'Active'; levelAr = 'نشطة'
+    phraseEn = 'There is movement in the field. Act where clarity is present, but leave room to observe and adjust.'
+    phraseAr = 'هناك حركة في الحقل. تحرّك حيث يوجد الوضوح، واترك مساحة للملاحظة والتعديل.'
+  } else if (score >= 36) {
+    levelEn = 'Grounded'; levelAr = 'متوازنة'
+    phraseEn = 'The day favours steady integration. Let insight become something practical rather than forcing momentum.'
+    phraseAr = 'يميل اليوم إلى التكامل الهادئ. حوّل البصيرة إلى شيء عملي بدلاً من فرض الحركة.'
+  } else {
+    levelEn = 'Quiet'; levelAr = 'هادئة'
+    phraseEn = 'The symbolic weather is quieter. Reflection, restoration and careful observation are favoured.'
+    phraseAr = 'الطقس الرمزي أكثر هدوءاً. يميل اليوم إلى التأمل والاستعادة والملاحظة الهادئة.'
+  }
+
+  return {
+    level: lang === 'en' ? levelEn : levelAr,
+    phrase: lang === 'en' ? phraseEn : phraseAr,
+    score,
+  }
+}
+
+function getPortal(date: Date, lang: Language) {
   const phase = getMoonPhase(date)
+  const day = date.getDate()
 
-  if (day === 11) return { name: lang === 'en' ? '11:11 Portal' : 'بوابة 11:11', desc: lang === 'en' ? 'Gateway of manifestation and alignment' : 'بوابة التجلي والمحاذاة', color: '#a855f7' }
-  if (day === 22) return { name: lang === 'en' ? '22:22 Master Portal' : 'بوابة 22:22 السيد', desc: lang === 'en' ? 'Architect energy — grand manifestation' : 'طاقة البنّاء — تجلٍّ كبير', color: '#fcd34d' }
-  if (day === 3 || day === 13 || day === 23) return { name: lang === 'en' ? '3 Portal' : 'بوابة 3', desc: lang === 'en' ? 'Creative alignment, self-expression' : 'محاذاة إبداعية، تعبير عن الذات', color: '#f0abfc' }
-  if (day === 7 || day === 17 || day === 27) return { name: lang === 'en' ? '7 Portal' : 'بوابة 7', desc: lang === 'en' ? 'Inner wisdom, spiritual insight' : 'الحكمة الداخلية، البصيرة الروحية', color: '#c084fc' }
-  if (day === 9 || day === 19 || day === 29) return { name: lang === 'en' ? '9 Portal' : 'بوابة 9', desc: lang === 'en' ? 'Completion, closure, karma' : 'الإكمال، الإغلاق، الكارما', color: '#60a5fa' }
-  if (phase < 0.03 || phase > 0.97) return { name: lang === 'en' ? 'New Moon Portal' : 'بوابة المحاق', desc: lang === 'en' ? 'Seed of intention, new cycles' : 'بذرة النية، دورات جديدة', color: '#a3a380' }
-  if (Math.abs(phase - 0.5) < 0.03) return { name: lang === 'en' ? 'Full Moon Portal' : 'بوابة البدر', desc: lang === 'en' ? 'Peak manifestation, release' : 'ذروة التجلي، التحرير', color: '#e7d5a5' }
-  if ((month === 3 && day >= 19) || (month === 6 && day >= 19) || (month === 9 && day >= 21) || (month === 12 && day >= 20)) {
-    return { name: lang === 'en' ? 'Seasonal Gateway' : 'البوابة الموسمية', desc: lang === 'en' ? 'Cosmic hinge of the year' : 'مفصل كوني في السنة', color: '#34d399' }
+  const seasons = Astronomy.Seasons(date.getUTCFullYear())
+  const events = [
+    { time: seasons.mar_equinox.date, en: 'March Equinox', ar: 'الاعتدال الربيعي' },
+    { time: seasons.jun_solstice.date, en: 'June Solstice', ar: 'الانقلاب الصيفي' },
+    { time: seasons.sep_equinox.date, en: 'September Equinox', ar: 'الاعتدال الخريفي' },
+    { time: seasons.dec_solstice.date, en: 'December Solstice', ar: 'الانقلاب الشتوي' },
+  ]
+  const nearSeason = events.find(e => Math.abs(date.getTime() - e.time.getTime()) <= 36 * 60 * 60 * 1000)
+  if (nearSeason) {
+    return { name: lang === 'en' ? `Seasonal Gateway · ${nearSeason.en}` : `البوابة الموسمية · ${nearSeason.ar}`, desc: lang === 'en' ? 'An astronomical seasonal turning point.' : 'نقطة تحول موسمية فلكية.', color: '#34d399' }
   }
-  return { name: lang === 'en' ? 'Open Sky' : 'السماء المفتوحة', desc: lang === 'en' ? 'No major gateway — integration time' : 'لا بوابة كبرى — وقت التكامل', color: '#94a3b8' }
+
+  if (phase < 0.025 || phase > 0.975) return { name: lang === 'en' ? 'New Moon Portal' : 'بوابة المحاق', desc: lang === 'en' ? 'A symbolic threshold for beginnings and intention.' : 'عتبة رمزية للبدايات والنية.', color: '#a3a380' }
+  if (Math.abs(phase - 0.5) < 0.025) return { name: lang === 'en' ? 'Full Moon Portal' : 'بوابة البدر', desc: lang === 'en' ? 'A symbolic peak for illumination and release.' : 'ذروة رمزية للإضاءة والتحرير.', color: '#e7d5a5' }
+
+  // These are intentionally symbolic calendar portals, not astronomical events.
+  if (day === 11) return { name: lang === 'en' ? '11:11 Symbolic Portal' : 'البوابة الرمزية 11:11', desc: lang === 'en' ? 'A numerological symbol of alignment and attention.' : 'رمز عددي للمحاذاة والانتباه.', color: '#a855f7' }
+  if (day === 22) return { name: lang === 'en' ? '22:22 Symbolic Portal' : 'البوابة الرمزية 22:22', desc: lang === 'en' ? 'A numerological symbol of building and embodiment.' : 'رمز عددي للبناء والتجسيد.', color: '#fcd34d' }
+  if ([3, 13, 23].includes(day)) return { name: lang === 'en' ? '3 Symbolic Portal' : 'البوابة الرمزية 3', desc: lang === 'en' ? 'Creative expression and communication.' : 'التعبير الإبداعي والتواصل.', color: '#f0abfc' }
+  if ([7, 17, 27].includes(day)) return { name: lang === 'en' ? '7 Symbolic Portal' : 'البوابة الرمزية 7', desc: lang === 'en' ? 'Inner inquiry and reflection.' : 'البحث الداخلي والتأمل.', color: '#c084fc' }
+  if ([9, 19, 29].includes(day)) return { name: lang === 'en' ? '9 Symbolic Portal' : 'البوابة الرمزية 9', desc: lang === 'en' ? 'Completion, closure and release.' : 'الإكمال والإغلاق والتحرير.', color: '#60a5fa' }
+
+  return { name: lang === 'en' ? 'Open Sky' : 'السماء المفتوحة', desc: lang === 'en' ? 'No major astronomical gateway is highlighted today.' : 'لا توجد بوابة فلكية كبرى مميزة اليوم.', color: '#94a3b8' }
 }
 
-function getEarthFrequency(date: Date, lang: 'en' | 'ar') {
-  const rng = mulberry32(seedFromDate(date) + 999)
-  const base = 7.83
-  const variation = rng() * 0.6 - 0.3
-  const value = (base + variation).toFixed(2)
-  const level = rng() < 0.33 ? 'low' : rng() < 0.5 ? 'high' : 'balanced'
-  const labels = {
-    en: { low: 'Grounding frequency — rest and rooting', balanced: 'Balanced frequency — harmony and flow', high: 'Elevated frequency — expansion and insight' },
-    ar: { low: 'تردد تأريضي — راحة وتجذير', balanced: 'تردد متوازن — انسجام وتدفق', high: 'تردد مرتفع — توسع وبصيرة' },
+function getGroundingTheme(planets: PlanetReading[], lang: Language) {
+  const elements = planets
+    .filter(p => ['sun', 'moon', 'mercury', 'venus', 'mars'].includes(p.id))
+    .map(p => getElement(Math.floor(p.longitude / 30)))
+  const counts = elements.reduce<Record<string, number>>((a, e) => { a[e] = (a[e] || 0) + 1; return a }, {})
+  const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0]
+  const themes: Record<string, { en: string; ar: string }> = {
+    fire: { en: 'Ground through action: choose one clear thing and do it.', ar: 'تجذّر عبر الفعل: اختر شيئاً واضحاً واحداً وقم به.' },
+    earth: { en: 'Ground through routine, structure and practical care.', ar: 'تجذّر عبر الروتين والبنية والعناية العملية.' },
+    air: { en: 'Ground through clarity: write, name and organise your thoughts.', ar: 'تجذّر عبر الوضوح: اكتب أفكارك وسمّها ونظّمها.' },
+    water: { en: 'Ground through emotional awareness without becoming consumed by it.', ar: 'تجذّر عبر الوعي بالمشاعر دون أن تبتلعك.' },
   }
-  return { value, level, label: labels[lang][level as 'low' | 'balanced' | 'high'] }
-}
-
-function getEnergyWeather(rng: () => number, lang: 'en' | 'ar') {
-  const levels = lang === 'en' ? ['Low', 'Neutral', 'Elevated', 'High'] : ['منخفضة', 'محايدة', 'مرتفعة', 'عالية']
-  const idx = Math.floor(rng() * 4)
-  const phrases = lang === 'en'
-    ? ['Rest. Let the field settle before you move.', 'Observe. Today is for integration, not forcing.', 'Flow. The current is with you — move gently but move.', 'Rise. The field is open. Act on what calls you.']
-    : ['استرح. دع الحقل يهدأ قبل أن تتحرك.', 'راقب. اليوم للتكامل، لا للإجبار.', 'تدفق. التيار معك — تحرك بلطف لكن تحرك.', 'انهض. الحقل مفتوح. افعل ما يناديك.']
-  return { level: levels[idx], phrase: phrases[idx] }
+  return themes[dominant || 'earth'][lang]
 }
 
 /* ============================================================
    PAGE
    ============================================================ */
+
 export default function ReadingEnergyPage() {
   const router = useRouter()
   const { language, toggleLanguage } = useLanguage()
   const [selectedCard, setSelectedCard] = useState<TarotCard | null>(null)
   const [stars, setStars] = useState<any[]>([])
   const [mounted, setMounted] = useState(false)
+  const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
     setMounted(true)
@@ -384,10 +491,14 @@ export default function ReadingEnergyPage() {
       s.push({ id: i, x: Math.random() * 100, y: Math.random() * 100, size: Math.random() * 1.3 + 0.3, delay: Math.random() * 5, duration: Math.random() * 3 + 2 })
     }
     setStars(s)
+
+    // Refresh periodically so an open tab naturally moves to the next day's reading.
+    const timer = window.setInterval(() => setNow(new Date()), 60_000)
+    return () => window.clearInterval(timer)
   }, [])
 
   const reading = useMemo(() => {
-    const today = new Date()
+    const today = now
     const seed = seedFromDate(today)
     const rng = mulberry32(seed)
 
@@ -400,6 +511,10 @@ export default function ReadingEnergyPage() {
     }))
 
     const phase = getMoonPhase(today)
+    const planets = getPlanets(today, language)
+    const aspects = getAspects(planets, language)
+    const energy = getEnergyWeather(planets, aspects, phase, language)
+
     const numerologyNumber = (() => {
       const str = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`
       let sum = str.split('').reduce((a, b) => a + parseInt(b), 0)
@@ -415,15 +530,16 @@ export default function ReadingEnergyPage() {
       moonPhaseName: getMoonPhaseName(phase, language),
       zodiac: getZodiacSeason(today, language),
       dayRuler: getDayRuler(today, language),
-      planets: getPlanets(today, language),
+      planets,
+      aspects,
       portal: getPortal(today, language),
-      frequency: getEarthFrequency(today, language),
-      energy: getEnergyWeather(rng, language),
+      energy,
+      groundingTheme: getGroundingTheme(planets, language),
       drawnCards,
       numerologyNumber,
       numerology,
     }
-  }, [language])
+  }, [language, now])
 
   const formatDate = (d: Date) => {
     return language === 'en'
@@ -552,10 +668,24 @@ export default function ReadingEnergyPage() {
                   {p.name}{p.retrograde ? ' ℞' : ''}
                 </div>
                 <div className="text-slate-200 text-sm italic">{p.sign}</div>
-                <div className="text-slate-500 text-[10px] mt-1">{p.degree}°</div>
+                <div className="text-slate-500 text-[10px] mt-1">{p.degree}° {String(p.minute).padStart(2, '0')}′</div>
               </div>
             ))}
           </div>
+          {reading.aspects.length > 0 && (
+            <div className="mt-5 pt-5 border-t border-amber-500/10">
+              <p className="text-[10px] tracking-[0.3em] uppercase text-amber-400/60 mb-3">
+                {language === 'en' ? 'Major aspects' : 'الاتصالات الرئيسية'}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {reading.aspects.slice(0, 5).map((aspect, i) => (
+                  <span key={i} className="rounded-full border px-3 py-1 text-[11px] text-slate-300/80" style={{ borderColor: 'rgba(251,191,36,0.18)' }}>
+                    {aspect.a.name} {aspect.type} {aspect.b.name} · {aspect.orb.toFixed(1)}°
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
 
         <motion.div
@@ -584,14 +714,13 @@ export default function ReadingEnergyPage() {
             <div className="flex items-center gap-3 mb-4">
               <PentacleIcon color="#fbbf24" size={22} />
               <h3 className="text-amber-300 text-xs tracking-[0.35em] uppercase">
-                {language === 'en' ? 'Earth Frequency' : 'تردد الأرض'}
+                {language === 'en' ? 'Grounding Theme' : 'موضوع التجذير'}
               </h3>
             </div>
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-3xl font-mono italic" style={{ color: '#f5e6b8' }}>{reading.frequency.value}</span>
-              <span className="text-amber-400/70 text-xs">Hz</span>
-            </div>
-            <p className="text-slate-300/85 text-sm italic leading-relaxed">{reading.frequency.label}</p>
+            <p className="text-2xl italic mb-2" style={{ color: '#f5e6b8' }}>
+              {language === 'en' ? 'Celestial balance' : 'التوازن السماوي'}
+            </p>
+            <p className="text-slate-300/85 text-sm italic leading-relaxed">{reading.groundingTheme}</p>
           </div>
         </motion.div>
 
