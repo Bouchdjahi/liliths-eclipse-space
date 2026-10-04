@@ -368,16 +368,16 @@ export default function LibraryPage() {
                 <div className="shrink-0 relative">
                   <div className="w-24 h-32 md:w-32 md:h-44 rounded border border-[#FFD700]/40 flex items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(160deg, rgba(40, 30, 10, 0.9), rgba(20, 15, 5, 0.95))', boxShadow: '0 0 30px rgba(255, 215, 0, 0.2)' }}>
                     <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at 50% 30%, rgba(255, 215, 0, 0.4), transparent 70%)' }} />
-                    <div className="text-center px-2"><div className="text-[#FFD700] text-2xl mb-1"><BookGlyph color="#FFD700" /></div><p className="text-[8px] tracking-[0.2em] uppercase text-[#FFD700]/70">ميتونيا</p></div>
+                    <div className="text-center px-2"><div className="text-[#FFD700] text-2xl mb-1"><BookGlyph color="#FFD700" /></div><p className="text-[8px] tracking-[0.2em] uppercase text-[#FFD700]/70">Lilith</p></div>
                   </div>
                   <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#FFD700] flex items-center justify-center" style={{ boxShadow: '0 0 15px rgba(255, 215, 0, 0.6)' }}><SparkleIcon color="#000" /></div>
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#FFD700]/40 bg-[#FFD700]/10 mb-3"><span className="w-1.5 h-1.5 rounded-full bg-[#FFD700] animate-pulse" /><span className="text-[9px] tracking-[0.3em] uppercase text-[#FFD700]">{language === 'en' ? 'Now Available' : 'متوفر الآن'}</span></div>
-                  <h2 className="font-serif text-xl md:text-3xl tracking-[0.15em] uppercase mb-2" style={{ color: '#FFD700', textShadow: '0 0 20px rgba(255, 215, 0, 0.4)' }}>{language === 'en' ? 'My Book ميتونيا is Now on Amazon' : 'كتابي ميتونيا متوفر الآن على أمازون'}</h2>
-                  <p className="text-[#c7beaa] text-sm leading-relaxed italic mb-3 max-w-lg">{language === 'en' ? 'Available as an eBook. If you are from Algeria or wish to buy it from another website, check my websites — go to Lilith Services website for details. My novel is also coming soon.' : 'متوفر ككتاب إلكتروني. إذا كنت من الجزائر أو ترغب في شرائه من موقع آخر، تحقق من مواقعي — انتقل إلى موقع خدمات ليليث للتفاصيل. روايتي قادمة أيضاً قريباً.'}</p>
+                  <h2 className="font-serif text-xl md:text-3xl tracking-[0.15em] uppercase mb-2" style={{ color: '#FFD700', textShadow: '0 0 20px rgba(255, 215, 0, 0.4)' }}>{language === 'en' ? 'My Book is Now on Amazon' : 'كتابي متوفر الآن على أمازون'}</h2>
+                  <p className="text-[#c7beaa] text-sm leading-relaxed italic mb-3 max-w-lg">{language === 'en' ? 'Available as an eBook. For those who wish to sell it or inquire about distribution rights, everything is on my other website. Visit Lilith\'s Website for more information.' : 'متوفر ككتاب إلكتروني. لمن يرغب في بيعه أو الاستفسار عن حقوق التوزيع، كل شيء على موقعي الآخر. تفضل بزيارة موقع ليليث لمزيد من المعلومات.'}</p>
                   <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                    <a href="https://a.co/d/03Pbpluw" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 rounded text-[10px] tracking-[0.25em] uppercase font-serif transition-all duration-300 hover:scale-105" style={{ background: 'rgba(255, 215, 0, 0.15)', color: '#FFD700', border: '1px solid rgba(255, 215, 0, 0.6)', boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)' }}><AmazonIcon color="#FFD700" />{language === 'en' ? 'Buy on Amazon' : 'اشترِ من أمازون'}</a>
+                    <a href="https://a.co/d/0fDYArZc" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 rounded text-[10px] tracking-[0.25em] uppercase font-serif transition-all duration-300 hover:scale-105" style={{ background: 'rgba(255, 215, 0, 0.15)', color: '#FFD700', border: '1px solid rgba(255, 215, 0, 0.6)', boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)' }}><AmazonIcon color="#FFD700" />{language === 'en' ? 'Buy on Amazon' : 'اشترِ من أمازون'}</a>
                     <a href="/space/websites" className="inline-flex items-center gap-2 px-5 py-2.5 rounded text-[10px] tracking-[0.25em] uppercase font-serif transition-all duration-300 hover:scale-105" style={{ background: 'rgba(255, 215, 0, 0.05)', color: '#FFD700', border: '1px solid rgba(255, 215, 0, 0.3)' }}>{language === 'en' ? "Visit Lilith's Website" : 'زيارة موقع ليليث'}</a>
                   </div>
                 </div>
@@ -549,64 +549,26 @@ export default function LibraryPage() {
       {showLilithBooks && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#0e1017] border border-[#FFD700]/40 max-w-lg w-full p-8 rounded-lg shadow-2xl text-center font-serif text-[#f4efe2] relative"
-            style={{ boxShadow: '0 0 60px rgba(255, 215, 0, 0.15)' }}>
-            <span className="absolute top-2 left-2 w-3 h-3 border-l border-t border-[#FFD700]/60" />
-            <span className="absolute top-2 right-2 w-3 h-3 border-r border-t border-[#FFD700]/60" />
-            <span className="absolute bottom-2 left-2 w-3 h-3 border-l border-b border-[#FFD700]/60" />
-            <span className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-[#FFD700]/60" />
-            
-            <button onClick={() => setShowLilithBooks(false)} className="absolute top-4 right-4 opacity-60 hover:opacity-100 transition-opacity" aria-label="close">
-              <CloseIcon color="#FFD700" />
-            </button>
-
-            <div className="flex justify-center mb-5"><BookGlyph color="#FFD700" /></div>
-            
-            <h3 className="text-2xl tracking-widest text-[#FFD700] uppercase mb-2" style={{ textShadow: '0 0 20px rgba(255, 215, 0, 0.5)' }}>
-              {language === 'en' ? 'ميتونيا' : 'ميتونيا'}
+            className="bg-[#0e1017] border border-[#e6ca95]/30 max-w-md w-full p-8 rounded-lg shadow-2xl text-center font-serif text-[#f4efe2] relative">
+            <span className="absolute top-2 left-2 w-3 h-3 border-l border-t border-[#e6ca95]/60" />
+            <span className="absolute top-2 right-2 w-3 h-3 border-r border-t border-[#e6ca95]/60" />
+            <span className="absolute bottom-2 left-2 w-3 h-3 border-l border-b border-[#e6ca95]/60" />
+            <span className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-[#e6ca95]/60" />
+            <div className="flex justify-center mb-5"><BookGlyph color="#e6ca95" /></div>
+            <h3 className="text-xl tracking-widest text-[#e6ca95] uppercase mb-5">
+              {language === 'en' ? "Lilith's Books" : 'كتب ليليث'}
             </h3>
-            
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#FFD700]/40 bg-[#FFD700]/10 mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD700] animate-pulse" />
-              <span className="text-[9px] tracking-[0.3em] uppercase text-[#FFD700]">{language === 'en' ? 'Available Now' : 'متوفر الآن'}</span>
-            </div>
-
-            <p className="text-sm text-[#c7beaa] leading-relaxed italic mb-4">
-              {language === 'en' 
-                ? 'My book ميتونيا is now available on Amazon as an eBook.' 
-                : 'كتابي ميتونيا متوفر الآن على أمازون ككتاب إلكتروني.'}
-            </p>
-
-            <p className="text-xs text-[#c7beaa]/70 leading-relaxed italic mb-6">
+            <p className="text-sm text-[#c7beaa] leading-relaxed italic mb-6">
               {language === 'en'
-                ? 'If you are from Algeria or wish to buy it from another website, check my websites — go to Lilith Services website for details. My novel is also coming soon.'
-                : 'إذا كنت من الجزائر أو ترغب في شرائه من موقع آخر، تحقق من مواقعي — انتقل إلى موقع خدمات ليليث للتفاصيل. روايتي قادمة أيضاً قريباً.'}
+                ? 'Lilith will upload her books soon. The manuscripts are unfolding beautifully in due time — patience is a virtue.'
+                : 'سترفع ليليث كتبها قريباً. المخطوطات تتكشف بشكل جميل في الوقت المناسب — الصبر فضيلة.'}
             </p>
-
-            <div className="flex flex-col gap-3 mb-6">
-              <a href="https://a.co/d/03Pbpluw" target="_blank" rel="noopener noreferrer" 
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-[10px] tracking-[0.25em] uppercase font-serif transition-all duration-300 hover:scale-105"
-                style={{ background: 'rgba(255, 215, 0, 0.15)', color: '#FFD700', border: '1px solid rgba(255, 215, 0, 0.6)', boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)' }}>
-                <AmazonIcon color="#FFD700" />
-                {language === 'en' ? 'Buy on Amazon' : 'اشترِ من أمازون'}
-              </a>
-              
-              <a href="/space/websites" 
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-[10px] tracking-[0.25em] uppercase font-serif transition-all duration-300 hover:scale-105"
-                style={{ background: 'rgba(255, 215, 0, 0.05)', color: '#FFD700', border: '1px solid rgba(255, 215, 0, 0.3)' }}>
-                {language === 'en' ? "Visit Lilith Services Website" : 'زيارة موقع خدمات ليليث'}
-              </a>
+            <div className="inline-block px-6 py-2 rounded text-[11px] tracking-[0.35em] uppercase mb-6"
+              style={{ color: '#e6ca95', border: '1px solid rgba(230, 202, 149, 0.4)', background: 'rgba(230, 202, 149, 0.08)', textShadow: '0 0 12px rgba(230, 202, 149, 0.5)' }}>
+              {language === 'en' ? 'Coming Soon' : 'قريباً'}
             </div>
-
-            <div className="border-t border-[#FFD700]/20 pt-5 mt-5">
-              <div className="inline-block px-6 py-2 rounded text-[11px] tracking-[0.35em] uppercase"
-                style={{ color: '#e6ca95', border: '1px solid rgba(230, 202, 149, 0.4)', background: 'rgba(230, 202, 149, 0.08)', textShadow: '0 0 12px rgba(230, 202, 149, 0.5)' }}>
-                {language === 'en' ? 'Novel Coming Soon' : 'الرواية قادمة قريباً'}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <button onClick={() => setShowLilithBooks(false)} className="px-6 py-2 bg-[#FFD700]/10 border border-[#FFD700]/40 text-xs tracking-widest uppercase hover:bg-[#FFD700]/20 transition-all text-[#FFD700] rounded">
+            <div>
+              <button onClick={() => setShowLilithBooks(false)} className="px-6 py-2 bg-[#e6ca95]/10 border border-[#e6ca95]/40 text-xs tracking-widest uppercase hover:bg-[#e6ca95]/20 transition-all text-[#e6ca95] rounded">
                 {language === 'en' ? 'Close' : 'إغلاق'}
               </button>
             </div>
