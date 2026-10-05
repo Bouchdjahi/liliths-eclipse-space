@@ -143,27 +143,47 @@ export default function WhoIsLilithPage() {
       
       {/* --- BACKGROUND VIDEO & ANIMATION LAYER --- */}
       <div className="fixed inset-0 z-0 overflow-hidden bg-obsidian pointer-events-none">
-        {/* The Video — mobile-compatible */}
+        {/* The Video — mobile autoplay compatible */}
         <video
+          ref={(el) => {
+            if (!el) return
+            el.muted = true
+            el.defaultMuted = true
+            el.volume = 0
+            el.setAttribute('muted', '')
+            el.setAttribute('playsinline', '')
+            el.setAttribute('webkit-playsinline', 'true')
+            const tryPlay = () => {
+              const p = el.play()
+              if (p && typeof p.catch === 'function') {
+                p.catch(() => {
+                  setTimeout(() => el.play().catch(() => {}), 300)
+                  setTimeout(() => el.play().catch(() => {}), 1200)
+                })
+              }
+            }
+            tryPlay()
+          }}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
-          // @ts-ignore - webkit attribute for older iOS
+          // @ts-ignore
           webkit-playsinline="true"
-          className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-screen"
-          style={{ pointerEvents: 'none' }}
-          onLoadedData={(e) => {
-            const v = e.currentTarget as HTMLVideoElement
-            v.muted = true
-            v.play().catch(() => {})
+          disablePictureInPicture
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          style={{
+            pointerEvents: 'none',
+            WebkitTransform: 'translateZ(0)',
+            transform: 'translateZ(0)',
           }}
         >
           <source src="/lilith-bg.mp4" type="video/mp4" />
+          <source src="/lilith-bg.webm" type="video/webm" />
         </video>
 
-        {/* Dark Cinematic Overlay - Lighter so video shows through */}
+        {/* Dark Cinematic Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-obsidian/50 to-obsidian/80" />
         
         {/* Subtle Crimson & Blue Atmospheric Fog */}
@@ -192,7 +212,7 @@ export default function WhoIsLilithPage() {
         })}
       </div>
 
-      {/* --- MAIN CONTENT (z-10 ensures it sits on top of the video) --- */}
+      {/* --- MAIN CONTENT --- */}
       <div className={`relative z-10 ${isRTL ? 'text-right' : 'text-left'}`}>
         
         {/* Top Navigation */}
@@ -204,7 +224,6 @@ export default function WhoIsLilithPage() {
             {t.back}
           </Link>
           
-          {/* Language Toggle */}
           <button 
             onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
             className="text-[10px] tracking-[0.3em] uppercase text-silver/80 hover:text-sovereign transition-colors bg-obsidian/80 backdrop-blur-md px-4 py-2 rounded-full border border-silver/20 hover:border-sovereign/60"
@@ -235,7 +254,6 @@ export default function WhoIsLilithPage() {
         {/* CONTENT SECTIONS */}
         <div className="max-w-4xl mx-auto px-6 space-y-24 pb-32">
           
-          {/* INTRO */}
           <section className="text-center space-y-6">
             <h2 className="font-display text-3xl md:text-4xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.introTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.introP1}</p>
@@ -244,7 +262,6 @@ export default function WhoIsLilithPage() {
             <p className="text-silver/80 leading-relaxed">{t.introP4}</p>
           </section>
 
-          {/* JOURNEY */}
           <section className="space-y-6 border-l-2 border-sovereign/40 pl-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.journeyTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.journeyP1}</p>
@@ -253,7 +270,6 @@ export default function WhoIsLilithPage() {
             <p className="text-silver/80 leading-relaxed">{t.journeyP4}</p>
           </section>
 
-          {/* SHADOW */}
           <section className="space-y-6 border-l-2 border-blood/50 pl-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.shadowTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.shadowP1}</p>
@@ -262,14 +278,12 @@ export default function WhoIsLilithPage() {
             <p className="text-silver/80 leading-relaxed">{t.shadowP4}</p>
           </section>
 
-          {/* ALCHEMY */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.alchemyTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.alchemyP1}</p>
             <p className="text-silver/80 leading-relaxed">{t.alchemyP2}</p>
           </section>
 
-          {/* ACADEMIC */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.academicTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.academicP1}</p>
@@ -278,14 +292,12 @@ export default function WhoIsLilithPage() {
             <p className="text-silver/80 leading-relaxed">{t.academicP4}</p>
           </section>
 
-          {/* NOW */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.nowTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.nowP1}</p>
             <p className="text-silver/80 leading-relaxed">{t.nowP2}</p>
           </section>
 
-          {/* INTERESTS */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.interestsTitle}</h2>
             <p className="text-silver/80 leading-relaxed text-center max-w-2xl mx-auto">{t.interestsP1}</p>
@@ -298,7 +310,6 @@ export default function WhoIsLilithPage() {
             </div>
           </section>
 
-          {/* AESTHETIC */}
           <section className="space-y-6 border border-silver/20 rounded-lg p-8 bg-obsidian/50 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blood/15 blur-[50px] rounded-full pointer-events-none" />
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.aestheticTitle}</h2>
@@ -307,7 +318,6 @@ export default function WhoIsLilithPage() {
             <p className="text-silver/80 leading-relaxed text-center">{t.aestheticP3}</p>
           </section>
 
-          {/* ANIMALS */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.animalsTitle}</h2>
             <p className="text-silver/80 leading-relaxed text-center max-w-2xl mx-auto">{t.animalsP1}</p>
@@ -329,7 +339,6 @@ export default function WhoIsLilithPage() {
             </div>
           </section>
 
-          {/* COSMIC BLUEPRINT */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.cosmicTitle}</h2>
             <p className="text-silver/80 leading-relaxed text-center">{t.cosmicP1}</p>
@@ -347,21 +356,18 @@ export default function WhoIsLilithPage() {
             </div>
           </section>
 
-          {/* LANGUAGES */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.languagesTitle}</h2>
             <p className="text-silver/80 leading-relaxed text-center">{t.languagesP1}</p>
             <p className="text-silver/80 leading-relaxed text-center">{t.languagesP2}</p>
           </section>
 
-          {/* CHARACTERS */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.charactersTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.charactersP1}</p>
             <p className="text-silver/80 leading-relaxed">{t.charactersP2}</p>
           </section>
 
-          {/* PERSONAL */}
           <section className="space-y-6 border border-silver/20 rounded-lg p-8 bg-obsidian/50 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute bottom-0 left-0 w-40 h-40 bg-siren/15 blur-[60px] rounded-full pointer-events-none" />
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.personalTitle}</h2>
@@ -369,14 +375,12 @@ export default function WhoIsLilithPage() {
             <p className="text-silver/80 leading-relaxed font-medium text-white">{t.personalP2}</p>
           </section>
 
-          {/* BUILD */}
           <section className="space-y-6">
             <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.buildTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.buildP1}</p>
             <p className="text-silver/80 leading-relaxed">{t.buildP2}</p>
           </section>
 
-          {/* WHY LILITH */}
           <section className="space-y-6 text-center border-t border-silver/20 pt-16">
             <h2 className="font-display text-3xl md:text-4xl tracking-[0.1em] text-white mb-8 drop-shadow-md">{t.whyTitle}</h2>
             <p className="text-silver/80 leading-relaxed">{t.whyP1}</p>
