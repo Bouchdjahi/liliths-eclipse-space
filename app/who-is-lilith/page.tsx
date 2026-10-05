@@ -249,15 +249,16 @@ export default function WhoIsLilithPage() {
   const t = CONTENT[lang]
   const isRTL = lang === 'ar'
 
-  // --------------------------------------------------
-  // MOBILE BACKGROUND VIDEO AUTOPLAY
-  // --------------------------------------------------
+  // ==================================================
+  // MOBILE VIDEO AUTOPLAY
+  // ==================================================
+
   useEffect(() => {
     const video = videoRef.current
 
     if (!video) return
 
-    // Force the properties required for mobile autoplay.
+    // Force all autoplay requirements.
     video.muted = true
     video.defaultMuted = true
     video.volume = 0
@@ -265,49 +266,83 @@ export default function WhoIsLilithPage() {
     video.setAttribute('muted', '')
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
+    video.setAttribute('autoplay', '')
 
-    const playVideo = async () => {
-      try {
-        // Make absolutely sure the video is muted.
-        video.muted = true
-        video.volume = 0
+    const playVideo = () => {
+      video.muted = true
+      video.defaultMuted = true
+      video.volume = 0
 
-        await video.play()
-      } catch {
-        // Some mobile browsers can temporarily block autoplay.
-        // We retry when the page becomes visible again.
+      const promise = video.play()
+
+      if (promise !== undefined) {
+        promise.catch(() => {
+          // Safari may reject the first autoplay attempt.
+        })
       }
     }
 
-    // Initial attempt.
+    // First attempt.
     playVideo()
 
-    // Retry if the browser restores the page/tab.
-    const handleVisibilityChange = () => {
+    // Try again when enough video data is available.
+    video.addEventListener('loadedmetadata', playVideo)
+    video.addEventListener('loadeddata', playVideo)
+    video.addEventListener('canplay', playVideo)
+    video.addEventListener('canplaythrough', playVideo)
+
+    // Try again if Safari restores the page.
+    const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         playVideo()
       }
     }
 
-    // Retry when the browser restores the page.
+    // Try again after returning through Safari navigation.
     const handlePageShow = () => {
       playVideo()
     }
 
     document.addEventListener(
       'visibilitychange',
-      handleVisibilityChange
+      handleVisibility
     )
 
-    window.addEventListener('pageshow', handlePageShow)
+    window.addEventListener(
+      'pageshow',
+      handlePageShow
+    )
 
     return () => {
-      document.removeEventListener(
-        'visibilitychange',
-        handleVisibilityChange
+      video.removeEventListener(
+        'loadedmetadata',
+        playVideo
       )
 
-      window.removeEventListener('pageshow', handlePageShow)
+      video.removeEventListener(
+        'loadeddata',
+        playVideo
+      )
+
+      video.removeEventListener(
+        'canplay',
+        playVideo
+      )
+
+      video.removeEventListener(
+        'canplaythrough',
+        playVideo
+      )
+
+      document.removeEventListener(
+        'visibilitychange',
+        handleVisibility
+      )
+
+      window.removeEventListener(
+        'pageshow',
+        handlePageShow
+      )
     }
   }, [])
 
@@ -332,19 +367,24 @@ export default function WhoIsLilithPage() {
           muted
           loop
           playsInline
+          controls={false}
           preload="auto"
+          disablePictureInPicture
+          disableRemotePlayback
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover opacity-60"
           style={{
             pointerEvents: 'none',
-            WebkitTransform: 'translateZ(0)',
-            transform: 'translateZ(0)',
+            WebkitTransform: 'translate3d(0, 0, 0)',
+            transform: 'translate3d(0, 0, 0)',
             WebkitBackfaceVisibility: 'hidden',
             backfaceVisibility: 'hidden',
           }}
         >
-          <source src="/lilith-bg.mp4" type="video/mp4" />
-          <source src="/lilith-bg.webm" type="video/webm" />
+          <source
+            src="/lilith-bg.mp4"
+            type="video/mp4"
+          />
         </video>
 
         {/* Dark Cinematic Overlay */}
@@ -357,7 +397,9 @@ export default function WhoIsLilithPage() {
 
         <div
           className="absolute bottom-[10%] right-[15%] w-[35vw] h-[35vw] rounded-full bg-siren/15 blur-[120px] animate-slow-drift"
-          style={{ animationDelay: '-15s' }}
+          style={{
+            animationDelay: '-15s',
+          }}
         />
 
         {/* Floating Particles */}
@@ -417,12 +459,19 @@ export default function WhoIsLilithPage() {
 
           <button
             onClick={() =>
-              setLang(lang === 'en' ? 'ar' : 'en')
+              setLang(
+                lang === 'en'
+                  ? 'ar'
+                  : 'en'
+              )
             }
             className="text-[10px] tracking-[0.3em] uppercase text-silver/80 hover:text-sovereign transition-colors bg-obsidian/80 backdrop-blur-md px-4 py-2 rounded-full border border-silver/20 hover:border-sovereign/60"
           >
-            {lang === 'en' ? 'العربية' : 'English'}
+            {lang === 'en'
+              ? 'العربية'
+              : 'English'}
           </button>
+
         </div>
 
         {/* ==================================================
@@ -920,6 +969,41 @@ export default function WhoIsLilithPage() {
 
         </div>
       </div>
+
+      {/* ==================================================
+          SAFARI VIDEO UI SUPPRESSION
+          ================================================== */}
+
+      <style jsx global>{`
+        video::-webkit-media-controls {
+          display: none !important;
+        }
+
+        video::-webkit-media-controls-enclosure {
+          display: none !important;
+        }
+
+        video::-webkit-media-controls-panel {
+          display: none !important;
+        }
+
+        video::-webkit-media-controls-start-playback-button {
+          display: none !important;
+          -webkit-appearance: none !important;
+        }
+
+        video::-webkit-media-controls-overlay-play-button {
+          display: none !important;
+          -webkit-appearance: none !important;
+        }
+
+        video {
+          pointer-events: none !important;
+          user-select: none !important;
+          -webkit-user-select: none !important;
+        }
+      `}</style>
+
     </div>
   )
 }
