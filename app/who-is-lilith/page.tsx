@@ -143,13 +143,22 @@ export default function WhoIsLilithPage() {
       
       {/* --- BACKGROUND VIDEO & ANIMATION LAYER --- */}
       <div className="fixed inset-0 z-0 overflow-hidden bg-obsidian pointer-events-none">
-        {/* The Video - Make sure opacity is visible enough */}
+        {/* The Video — mobile-compatible */}
         <video
           autoPlay
           loop
           muted
           playsInline
+          preload="auto"
+          // @ts-ignore - webkit attribute for older iOS
+          webkit-playsinline="true"
           className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-screen"
+          style={{ pointerEvents: 'none' }}
+          onLoadedData={(e) => {
+            const v = e.currentTarget as HTMLVideoElement
+            v.muted = true
+            v.play().catch(() => {})
+          }}
         >
           <source src="/lilith-bg.mp4" type="video/mp4" />
         </video>
@@ -210,7 +219,6 @@ export default function WhoIsLilithPage() {
             {t.symbol}
           </div>
           
-          {/* FIXED: Made the title bright white/silver so it pops against the video */}
           <h1 className="font-display text-6xl md:text-8xl lg:text-9xl tracking-[0.2em] text-white drop-shadow-[0_0_30px_rgba(74,140,255,0.4)] mb-6">
             {t.title}
           </h1>
