@@ -3,396 +3,1416 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-// --- TRANSLATIONS ---
-const CONTENT = {
+type Animal = {
+  label: string
+  name: string
+  title: string
+  description: string
+}
+
+type Zodiac = {
+  placement: string
+  sign: string
+}
+
+type Character = {
+  name: string
+  description: string
+}
+
+type PersonalItem = {
+  label: string
+  value: string
+  description: string
+}
+
+type Card = {
+  id: string
+  number: string
+  title: string
+  category: string
+  content: string[]
+  accent?: 'red' | 'white'
+  type?:
+    | 'tags'
+    | 'animals'
+    | 'zodiac'
+    | 'languages'
+    | 'personal'
+    | 'mbti'
+    | 'characters'
+    | 'celebrity'
+  tags?: string[]
+  animals?: Animal[]
+  zodiac?: Zodiac[]
+  languages?: {
+    current: {
+      language: string
+      level?: string
+    }[]
+    learning: {
+      language: string
+    }[]
+  }
+  personal?: PersonalItem[]
+  mbti?: {
+    type: string
+    title: string
+    description: string
+  }
+  characters?: Character[]
+  celebrity?: {
+    name: string
+    description: string
+  }
+}
+
+type ContentSet = {
+  back: string
+  title: string
+  subtitle: string
+  langToggle: string
+  introLabel: string
+  introText: string
+  footerText: string
+  cards: Card[]
+}
+
+const CONTENT: Record<'en' | 'ar', ContentSet> = {
   en: {
-    back: "← Back to Eclipse",
-    symbol: "⋆˖⁺‧₊☽◯☾₊‧⁺˖⋆",
-    title: "LILITH",
-    subtitle1: "VAMPIRE",
-    subtitle2: "SIREN",
-    tagline: "Explore the cosmic being",
-    introTitle: "LILITH",
-    introP1: "There is much more behind the name Lilith than a simple nickname. Lilith is the name I chose to represent a part of me. It reflects my personality, my aesthetic, my energy, the things I am drawn to, and the way I perceive the world.",
-    introP2: "In some strange way, the name has been haunting me since I was a child — long before I understood why I felt so drawn to it.",
-    introP3: "I prefer to keep my real name private. Lilith is the identity I share with the world. Not because it replaces who I am, but because it expresses a part of me that feels deeply authentic.",
-    introP4: "I am in my late twenties, Algerian, currently living in Algeria, with Turkish ancestry. But nationality, age and background are only the outer layers. What interests me is everything underneath.",
-    journeyTitle: "THE JOURNEY BENEATH THE SURFACE",
-    journeyP1: "At the heart of my journey is a search for union with my Higher Self. For me, this does not mean becoming perfect or escaping the human experience. It means learning to know every part of myself — including the parts I once rejected, feared, misunderstood or tried to hide.",
-    journeyP2: "My journey has been about finding balance between the poles within me: light and darkness, Yin and Yang, soul and material existence, heart and mind, intuition and reason, strength and vulnerability, creation and destruction, acceptance and transformation.",
-    journeyP3: "I do not believe that one side must destroy the other. I believe there is wisdom in learning how to hold both. The light cannot teach me everything. Neither can the darkness. It is in understanding the relationship between them that I find wholeness.",
-    journeyP4: "That is why my path has led me towards shadow work, healing, self-examination and inner integration. I want to understand my wounds rather than simply cover them. I want to face my shadow rather than pretend it does not exist.",
-    shadowTitle: "SHADOW, WOUNDS & REBIRTH",
-    shadowP1: "My spiritual path is deeply connected to shadow work. I am interested in the parts of ourselves that we hide from ourselves — the fears, wounds, contradictions, suppressed emotions, insecurities and unconscious patterns that quietly shape the way we live.",
-    shadowP2: "My message is not that we should romanticise darkness. It is that we should become conscious of it. Because what we refuse to face does not necessarily disappear. Sometimes it simply continues to influence us from somewhere we cannot see.",
-    shadowP3: "There were moments when I felt as though I had been completely burned down. But I returned. Not as the person I had been. I returned carrying the ashes of who I once was — and built something new from them.",
-    shadowP4: "That is what rebirth means to me. Not erasing the past. Not pretending that the fire never happened. But becoming conscious of what survived it.",
-    alchemyTitle: "ALCHEMY & STOICISM",
-    alchemyP1: "Two ideas deeply resonate with the way I see transformation: alchemy and Stoicism. Alchemy, to me, is a metaphor for transformation — taking what appears broken, painful or ordinary and transforming its meaning into something conscious and valuable.",
-    alchemyP2: "Stoicism reminds me of the importance of discipline, inner sovereignty, acceptance and focusing my energy on what I can actually shape. Together, they represent something I continually work towards: transforming without losing myself, accepting without surrendering, feeling without being consumed, and rebuilding without forgetting where I came from.",
-    academicTitle: "MY ACADEMIC & PROFESSIONAL PATH",
-    academicP1: "My interests may seem scattered at first glance, but there is a thread connecting them: I want to understand both humanity and the systems that shape our world.",
-    academicP2: "I obtained a Baccalaureate in Technical Mathematics, specialising in Civil Engineering, and later completed a Master's degree in English Linguistics. Alongside my formal education, I have independently explored psychology, including abnormal psychology and dark psychology, as well as web development and technology.",
-    academicP3: "I am currently developing my knowledge of programming and cybersecurity, with a long-term goal of becoming a: Robotics & Autonomous Systems Engineer — Extreme Environment Exploration.",
-    academicP4: "I want to work towards creating autonomous robotic systems capable of exploring environments that are difficult, dangerous or inaccessible to humans — including extreme environments on Earth and, eventually, beyond it.",
-    nowTitle: "WHAT I DO NOW",
-    nowP1: "Teaching has been one of the most consistent parts of my life. I work as an English teacher and university instructor, as well as in private education and freelance work. I have almost four years of teaching experience across different educational sectors.",
-    nowP2: "Teaching allows me to combine language, communication, creativity and human understanding. At the same time, I am continuing to build my future in technology, programming, cybersecurity and robotics.",
-    interestsTitle: "THE MANY WORLDS THAT INTEREST ME",
-    interestsP1: "I have never been able to fit my curiosity into one category. What connects these interests is not a single subject. It is curiosity about what lies beneath the obvious.",
-    aestheticTitle: "MY AESTHETIC",
-    aestheticP1: "My aesthetic is alternative, but it refuses to stay inside one box. I move between nu-goth, traditional goth, gothic, and sometimes boho.",
-    aestheticP2: "I am drawn to black, deep blue, cosmic darkness, eclipses, the moon, vintage elements, gothic architecture, sirens, vampires, snakes, shadows and ancient symbolism.",
-    aestheticP3: "I like darkness when it feels elegant, mysterious and meaningful, rather than exaggerated. For me, darkness is not automatically something negative. Sometimes it is simply where the hidden becomes visible.",
-    animalsTitle: "MY SYMBOLIC ANIMALS",
-    animalsP1: "I see these animals as personal symbols and archetypes, representing qualities and themes that resonate with my journey.",
-    cosmicTitle: "MY COSMIC BLUEPRINT",
-    cosmicP1: "According to the birth-chart system I follow:",
-    languagesTitle: "MY LANGUAGES",
-    languagesP1: "I speak: Arabic • English • French. And I am currently learning: Japanese • German • Italian.",
-    languagesP2: "Languages fascinate me because every language carries its own worldview, rhythm and way of expressing reality.",
-    charactersTitle: "THE CHARACTERS & ENERGY I RESONATE WITH",
-    charactersP1: "Some fictional characters fascinate me because of their symbolism, complexity or presence. Makima and Esdeath are characters whose fictional archetypes I find compelling. Effy Stonem and Hannibal Lecter also represent the kind of psychologically complex and darker fictional characters that I enjoy exploring.",
-    charactersP2: "As for celebrity energy and aesthetic presence, Megan Fox is someone whose look and presence I find particularly captivating — and yes, she is my celebrity crush. These are fictional and aesthetic references that resonate with me; they do not mean that I consider myself identical to these characters.",
-    personalTitle: "A PERSONAL PART OF MY STORY",
-    personalP1: "I identify as aroace — aromantic and asexual. I also live with experiences related to BPD and avoidant attachment, and these experiences have influenced parts of my journey with emotional boundaries, relationships, self-understanding and healing.",
-    personalP2: "But I refuse to reduce myself to any diagnosis, label or difficult chapter. My struggles are part of my story. They are not the entirety of who I am.",
-    buildTitle: "WHAT I WANT TO BUILD",
-    buildP1: "Everything eventually comes back to one thing: creation. I don't want my journey to end with simply understanding myself. I want to create. To learn. To build. To explore. To teach. To write. To design. To experiment. To connect seemingly unrelated worlds.",
-    buildP2: "I want to bring together the human and the technological, the psychological and the philosophical, the mysterious and the scientific, the Earth and the cosmos. Perhaps my path will change along the way. But the direction remains the same: to become more conscious, more capable, and more useful — and eventually build something that can exist beyond me and contribute something meaningful to humanity.",
-    whyTitle: "AND FINALLY — WHY LILITH?",
-    whyP1: "Because Lilith is not merely an aesthetic. She is a symbol of a journey. A journey from fragmentation towards integration. From fear towards understanding. From wounds towards healing. From unconscious patterns towards awareness. From destruction towards reconstruction. From darkness towards the wisdom hidden within it.",
-    whyP2: "And perhaps most importantly: from searching outside myself for the answer, to learning how to return to myself.",
-    whyP3: "I have been many versions of myself. Some I loved. Some I outgrew. Some I had to leave behind. Some broke me. Some saved me. And some are still being discovered.",
-    whyP4: "My journey is not about choosing between the light and the dark. It is about learning to hold both. Not heart against mind, but heart with mind. Not soul against matter, but soul within existence. Not darkness against light, but understanding the purpose of both. Not destroying the shadow, but meeting it. Not becoming someone else, but becoming more fully myself.",
-    whyFinal: "I am Lilith. I am still learning. Still healing. Still questioning. Still transforming. Still becoming.",
-    whyFinalP: "And perhaps that is what Lilith has always meant to me: not a finished identity, but an ongoing transformation.",
+    back: '← BACK TO ECLIPSE',
+    title: 'LILITH',
+    subtitle: 'VAMPIRE • SIREN',
+    langToggle: 'العربية',
+    introLabel: 'GETTING TO KNOW LILITH',
+    introText:
+      'There is a lot behind the name Lilith.',
+    footerText:
+      'WRITE IT. FEEL IT. RELEASE IT. RETURN TO YOURSELF.',
+
+    cards: [
+      {
+        id: 'getting-to-know',
+        number: '01',
+        title: 'GETTING TO KNOW LILITH',
+        category: 'THE NAME',
+        accent: 'red',
+        content: [
+          'There is a lot behind the name Lilith.',
+          'Lilith is my nickname, but to me, it is much more than a name. It represents a part of my personality, my aesthetic, my energy, and the way I see the world. In some way, the name has been haunting me since I was a child, long before I fully understood why I was drawn to it.',
+          'It became a symbol of the parts of myself that I could not always explain: curiosity, darkness, independence, transformation, mystery, femininity, introspection, and the constant desire to understand what exists beneath the surface.',
+          'So, if you know me as Lilith, you are not simply knowing a nickname. You are seeing a part of who I am.',
+          'And Eclipse carries a meaning of its own. It refers to a Japanese legend in which the Sun and the Moon loved each other, but because they existed at different times, they could never meet. According to the legend, God created the eclipse so that they could finally meet, if only for a moment.',
+          'To me, that image represents the idea that there is no impossible love — only circumstances that may keep two souls apart until the moment they are finally allowed to meet. It is also connected to my own understanding of the twin flame story.'
+        ]
+      },
+
+      {
+        id: 'about',
+        number: '02',
+        title: 'A LITTLE ABOUT ME',
+        category: 'IDENTITY',
+        content: [
+          'I am in my late twenties.',
+          'I am Algerian and currently live in Algeria, with Turkish heritage.',
+          'I tend to be a private person, so I prefer keeping certain parts of my identity to myself. I believe that not everything meaningful about a person needs to be publicly revealed.',
+          'I am someone who is constantly learning, questioning, creating, and rebuilding myself.',
+          "I don't think I have ever been interested in living only on the surface of things.",
+          'I want to know why.',
+          'Why people behave the way they do. Why we become who we become. Why certain symbols appear throughout history. Why we dream. Why cultures develop differently. Why humans fear certain things. Why we are attracted to darkness, beauty, mystery, and the unknown.',
+          'I am fascinated by the layers underneath ordinary life.'
+        ]
+      },
+
+      {
+        id: 'education',
+        number: '03',
+        title: 'EDUCATION & KNOWLEDGE',
+        category: 'KNOWLEDGE',
+        content: [
+          'My academic background is quite diverse.',
+          'I obtained my Baccalaureate in Technical Mathematics — Civil Engineering.',
+          "I then pursued a Master's degree in English Linguistics.",
+          'Alongside my formal education, I have independently explored subjects that interest me deeply, including psychology, abnormal psychology, forensic psychology, human behaviour, and what is often referred to as dark psychology.',
+          'I also have a background in web development, and I am currently expanding my knowledge of programming, cybersecurity, robotics, artificial intelligence, and autonomous systems.',
+          'For me, learning is not something that ends with a degree.',
+          'I am interested in becoming someone who can move between different worlds of knowledge rather than being confined to one.'
+        ]
+      },
+
+      {
+        id: 'career',
+        number: '04',
+        title: 'WHAT I DO',
+        category: 'CAREER & FUTURE',
+        content: [
+          'I currently work as an English instructor at university, at a private school, and as a freelancer.',
+          'I have almost four years of teaching experience across different educational sectors.',
+          'Teaching is one part of my life, but it is not the only direction I am pursuing.',
+          'I am also working towards a much bigger dream: Robotics & Autonomous Systems Engineer — Extreme Environment Exploration.',
+          'I want to work at the intersection of robotics, autonomous systems, technology, exploration, and science — building systems capable of going where humans cannot easily go.',
+          'My curiosity extends from the depths of the oceans to the vastness of space.',
+          'I want to explore the unknown through technology.'
+        ]
+      },
+
+      {
+        id: 'mind',
+        number: '05',
+        title: 'THE THINGS THAT LIVE IN MY MIND',
+        category: 'CURIOSITY',
+        content: [
+          'My interests are probably one of the hardest things to summarise because they are everywhere.',
+          'I am deeply interested in shadow work, psychology, abnormal psychology, forensic psychology, human behaviour, neuroscience, philosophy, emotional intelligence, body language, birth charts and astrology, spirituality, mythology, ancient civilisations, Ancient Greek culture, Japanese culture, ancient symbols, symbolism, astronomy, space, moon phases, parallel universe theories, dream meanings, lucid dreaming, mystery, horror, true crime, crime documentaries, gothic aesthetics, dark academia, cosmic and vintage aesthetics, storytelling, art and music, hidden meanings in films and music, cultures and languages, technology and AI, meditation, energy frequencies, energy healing, manifestation, tarot, self-improvement, fitness and healthy living, and animals.',
+          'And probably most importantly: I love understanding things that make people stop and ask questions.'
+        ]
+      },
+
+      {
+        id: 'aesthetic',
+        number: '06',
+        title: 'MY AESTHETIC',
+        category: 'VISUAL LANGUAGE',
+        type: 'tags',
+        tags: [
+          'ALTERNATIVE',
+          'GOTHIC',
+          'NU-GOTH',
+          'TRADITIONAL GOTH',
+          'BOHO',
+          'DARK ACADEMIA',
+          'COSMIC',
+          'VINTAGE',
+          'VAMPIRE',
+          'SIREN',
+          'ECLIPSE',
+          'MIDNIGHT BLUE',
+          'BLACK',
+          'BLOOD RED',
+          'MOONLIGHT',
+          'MYSTERY'
+        ],
+        content: [
+          "My aesthetic is alternative and gothic, but I don't like being restricted to one category.",
+          'Sometimes I lean towards nu-goth. Sometimes traditional goth. Sometimes boho. Sometimes something darker, more cosmic, vintage, mysterious, or simply impossible to categorise.',
+          'I love the combination of darkness + elegance + mystery + femininity + cosmic symbolism.',
+          'I am drawn to black, deep blues, eclipses, snakes, ravens, old symbols, moonlight, rainy weather, gothic architecture, vintage imagery, mysterious places, cosmic landscapes, and anything that feels like it belongs somewhere between reality and a dream.'
+        ]
+      },
+
+      {
+        id: 'animals',
+        number: '07',
+        title: 'MY SPIRITUAL ANIMALS',
+        category: 'SYMBOLISM',
+        type: 'animals',
+        animals: [
+          {
+            label: 'PRIMARY SPIRIT ANIMAL',
+            name: 'SNAKE',
+            title: 'Transformation • Rebirth • Hidden Wisdom',
+            description:
+              'The snake represents transformation, rebirth, and hidden wisdom. Like a snake shedding its skin, I see myself as someone who constantly evolves, leaves old versions of herself behind, and searches for deeper truths. It reflects my attraction to shadow work, self-discovery, transformation, and personal growth.'
+          },
+          {
+            label: 'GUIDE ANIMAL',
+            name: 'OWL',
+            title: 'Intuition • Insight • Observation',
+            description:
+              'The owl represents intuition, insight, observation, and seeing what others overlook. It symbolises my desire to understand what exists beneath the obvious.'
+          },
+          {
+            label: 'SHADOW ANIMAL',
+            name: 'RAVEN',
+            title: 'Mystery • Unconscious • Transformation',
+            description:
+              'The raven represents mystery, the unconscious, transformation, and wisdom found in darkness. It reflects my willingness to explore difficult emotions, uncomfortable questions, and the parts of life that people sometimes avoid.'
+          },
+          {
+            label: 'PROTECTIVE ANIMAL',
+            name: 'BLACK JAGUAR',
+            title: 'Strength • Protection • Instinct',
+            description:
+              'The black jaguar represents strength, protection, courage, instinct, and mastery of the shadow. It reminds me to stand in my own power and trust myself when moving through uncertainty.'
+          },
+          {
+            label: 'HIGHER PERSPECTIVE ANIMAL',
+            name: 'EAGLE',
+            title: 'Freedom • Vision • Perspective',
+            description:
+              'The eagle represents freedom, independence, vision, and the ability to see the bigger picture. It reflects my desire to rise above limitations, find my own path, and understand life from a wider perspective.'
+          }
+        ],
+        content: [
+          'These animals are symbolic representations of qualities and psychological themes that resonate with different parts of me.'
+        ]
+      },
+
+      {
+        id: 'zodiac',
+        number: '08',
+        title: 'MY COSMIC BLUEPRINT',
+        category: 'ASTROLOGY',
+        type: 'zodiac',
+        zodiac: [
+          {
+            placement: 'RISING',
+            sign: 'LEO'
+          },
+          {
+            placement: 'SUN',
+            sign: 'TAURUS'
+          },
+          {
+            placement: 'MOON',
+            sign: 'VIRGO'
+          },
+          {
+            placement: 'VENUS',
+            sign: 'GEMINI'
+          },
+          {
+            placement: 'MERCURY',
+            sign: 'ARIES'
+          },
+          {
+            placement: 'MARS',
+            sign: 'SCORPIO'
+          },
+          {
+            placement: 'LILITH',
+            sign: 'SCORPIO'
+          }
+        ],
+        content: [
+          'My astrological placements are Rising — Leo, Sun — Taurus, Moon — Virgo, Venus — Gemini, Mercury — Aries, Mars — Scorpio, and Lilith — Scorpio.',
+          'Astrology is one of the symbolic systems I enjoy exploring because I find it fascinating as a language for personality, archetypes, symbolism, and self-reflection.'
+        ]
+      },
+
+      {
+        id: 'personality',
+        number: '09',
+        title: 'MY PERSONALITY',
+        category: 'MBTI',
+        type: 'mbti',
+        mbti: {
+          type: 'INTJ-T',
+          title: 'THE ARCHITECT',
+          description:
+            'I naturally gravitate towards strategy, independence, observation, analysis, long-term thinking, and understanding systems.'
+        },
+        content: [
+          'I enjoy figuring things out for myself.',
+          'I tend to question things rather than simply accepting them, and I value depth over superficiality.',
+          'I do not see MBTI as a complete definition of who I am. I see it as one framework that describes certain tendencies in the way I think, process information, and approach the world.'
+        ]
+      },
+
+      {
+        id: 'languages',
+        number: '10',
+        title: 'LANGUAGES',
+        category: 'CULTURE & COMMUNICATION',
+        type: 'languages',
+        languages: {
+          current: [
+            {
+              language: 'ARABIC',
+              level: 'SPOKEN'
+            },
+            {
+              language: 'ENGLISH',
+              level: 'SPOKEN'
+            },
+            {
+              language: 'FRENCH',
+              level: 'SPOKEN'
+            }
+          ],
+          learning: [
+            {
+              language: 'JAPANESE'
+            },
+            {
+              language: 'GERMAN'
+            },
+            {
+              language: 'ITALIAN'
+            }
+          ]
+        },
+        content: [
+          'Languages fascinate me because learning a language is not simply learning vocabulary.',
+          'It is stepping into another culture, another way of thinking, and sometimes another version of yourself.'
+        ]
+      },
+
+      {
+        id: 'hobbies',
+        number: '11',
+        title: 'WHAT I DO FOR FUN',
+        category: 'OFF THE RECORD',
+        content: [
+          'I have far too many hobbies to have just one.',
+          'I love reading, writing, cooking — which genuinely calms me — fitness, yoga, crochet, although I am still a beginner, learning random things, watching crime documentaries, exploring mythology, studying psychology, listening to music, storytelling, and exploring films and their hidden meanings.',
+          'I am the kind of person who can spend hours going down an unexpected research rabbit hole simply because one question led to another.'
+        ]
+      },
+
+      {
+        id: 'characters',
+        number: '12',
+        title: 'CHARACTERS THAT REPRESENT DIFFERENT SIDES OF ME',
+        category: 'FICTIONAL ARCHETYPES',
+        type: 'characters',
+        characters: [
+          {
+            name: 'MAKIMA',
+            description:
+              'Represents certain aspects of the powerful, controlled, intimidating feminine archetype that fascinates me.'
+          },
+          {
+            name: 'ESDEATH',
+            description:
+              'Represents another expression of the powerful, commanding, controlled feminine archetype that I find psychologically fascinating.'
+          },
+          {
+            name: 'EFFY STONEM',
+            description:
+              'Represents complexity, emotional contradiction, mystery, vulnerability, and detachment.'
+          },
+          {
+            name: 'HANNIBAL',
+            description:
+              'Represents my fascination with intelligence, psychology, aesthetics, symbolism, philosophy, and the darker sides of human nature.'
+          }
+        ],
+        content: [
+          "These characters don't define me literally. I simply find different fragments of their archetypes fascinating."
+        ]
+      },
+
+      {
+        id: 'energy',
+        number: '13',
+        title: 'THE ENERGY I AM DRAWN TO',
+        category: 'ATTRACTION & AESTHETICS',
+        type: 'celebrity',
+        celebrity: {
+          name: 'MEGAN FOX',
+          description:
+            'If I had to describe the kind of beauty and energy I am naturally drawn towards, Megan Fox is probably the closest celebrity reference. She is also my celebrity crush, so there is that.'
+        },
+        content: []
+      },
+
+      {
+        id: 'personal',
+        number: '14',
+        title: 'A MORE PRIVATE PART OF ME',
+        category: 'PERSONAL',
+        type: 'personal',
+        accent: 'red',
+        personal: [
+          {
+            label: 'SEXUALITY',
+            value: 'AROACE',
+            description:
+              'I identify as aromantic and asexual.'
+          },
+          {
+            label: 'ATTRACTION',
+            value: 'SAPIOSEXUAL',
+            description:
+              'I am particularly drawn to intelligence, depth of thought, and meaningful intellectual connection.'
+          },
+          {
+            label: 'WORLDVIEW',
+            value: 'ANTINATALIST',
+            description:
+              'I identify with antinatalism, a philosophical position concerning the ethical implications of bringing new life into existence.'
+          },
+          {
+            label: 'PHILOSOPHY',
+            value: 'ALCHEMY • STOICISM',
+            description:
+              'Alchemy and Stoicism are two philosophical and symbolic frameworks that influence the way I think about transformation, discipline, suffering, meaning, self-mastery, and becoming.'
+          },
+          {
+            label: 'PERSONAL EXPERIENCE',
+            value: 'AVOIDANT PERSONALITY DISORDER',
+            description:
+              'This is part of my personal experience and has influenced the way I understand boundaries, vulnerability, relationships, identity, and self-awareness.'
+          }
+        ],
+        content: [
+          "I identify as aromantic and asexual — aroace.",
+          'I also identify with sapiosexuality, particularly in the sense that intelligence, depth of thought, and meaningful intellectual connection strongly influence the kind of attraction I experience.',
+          'Antinatalism is also part of my philosophical worldview, alongside my interest in alchemy and Stoicism.',
+          "I have Avoidant Personality Disorder, which is part of my personal experience, but I don't want it to become the definition of who I am.",
+          'These things are parts of my story, not the entirety of my identity.'
+        ]
+      },
+
+      {
+        id: 'why',
+        number: '15',
+        title: 'WHY LILITH?',
+        category: 'THE CORE',
+        accent: 'red',
+        content: [
+          'Perhaps the easiest way to explain everything above is this:',
+          'I have always been drawn to the things that exist between opposites.',
+          'Light and darkness. Science and mystery. Logic and intuition. Beauty and horror. The physical and the symbolic. The known and the unknown.',
+          "I don't want to choose only one side.",
+          'I want to explore the space between them.',
+          'That is what Lilith represents to me.',
+          'Not perfection. Not darkness for the sake of darkness. But curiosity, transformation, independence, depth, and the courage to look beneath the surface.',
+          'I am still becoming.',
+          'Still learning.',
+          'Still shedding old skins.',
+          'Still asking questions.',
+          'Still building the person I want to become.',
+          'And perhaps that is the most accurate introduction I can give you:',
+          'I am Lilith — and I am still discovering what that means.'
+        ]
+      }
+    ]
   },
+
   ar: {
-    back: "← العودة إلى الكسوف",
-    symbol: "⋆˖⁺‧₊☽◯☾₊‧⁺˖⋆",
-    title: "ليليث",
-    subtitle1: "مصاصة الدماء",
-    subtitle2: "حورية البحر",
-    tagline: "استكشفي الكينونة الكونية",
-    introTitle: "ليليث",
-    introP1: "هناك الكثير وراء اسم ليليث أكثر من كونه مجرد لقب. ليليث هو الاسم الذي اخترته ليعبّر عن جزء مني. فهو يعكس شخصيتي، وذوقي الجمالي، وطاقتي، والأشياء التي أنجذب إليها، والطريقة التي أرى بها العالم.",
-    introP2: "وبطريقة غامضة ما، ظل هذا الاسم يطاردني منذ طفولتي، قبل وقت طويل من أن أفهم سبب شعوري بهذا الانجذاب نحوه.",
-    introP3: "أفضل أن أبقي اسمي الحقيقي خاصاً. ليليث هي الهوية التي أشاركها مع العالم. ليس لأنها تحل محل من أكون، بل لأنها تعبّر عن جانب مني أشعر بأنه صادق وعميق وأصيل.",
-    introP4: "أنا في أواخر العشرينيات من عمري، جزائرية أعيش حالياً في الجزائر، ولدي أصول تركية. لكن العمر والجنسية والخلفية ليست سوى الطبقات الخارجية. أما ما يثير اهتمامي حقاً فهو كل ما يكمن تحت السطح.",
-    journeyTitle: "الرحلة التي تكمن تحت السطح",
-    journeyP1: "في قلب رحلتي يوجد بحث عن الاتحاد بذاتي العليا. وبالنسبة إليّ، لا يعني ذلك أن أصبح كاملة أو أن أهرب من التجربة الإنسانية. بل يعني أن أتعلم معرفة كل جزء مني؛ بما في ذلك الأجزاء التي رفضتها أو خفت منها أو أسأت فهمها أو حاولت إخفاءها في الماضي.",
-    journeyP2: "كانت رحلتي تتمحور حول إيجاد التوازن بين الأقطاب الموجودة داخلي: النور والظلام، اليِن واليانغ، الروح والوجود المادي، القلب والعقل، الحدس والمنطق، القوة والهشاشة، الخلق والهدم، التقبّل والتحوّل.",
-    journeyP3: "لا أؤمن بأن على أحد الجانبين أن يدمر الآخر. بل أؤمن بأن الحكمة تكمن في تعلّم كيفية احتواء الاثنين معاً. فالنور وحده لا يستطيع أن يعلّمني كل شيء. والظلام كذلك. إن فهم العلاقة بينهما هو ما يقودني نحو التكامل.",
-    journeyP4: "ولهذا قادتني رحلتي نحو عمل الظل، والشفاء، والتأمل في الذات، والتكامل الداخلي. أريد أن أفهم جراحي بدلاً من أن أكتفي بتغطيتها. أريد أن أواجه ظلي بدلاً من التظاهر بأنه غير موجود.",
-    shadowTitle: "الظل والجراح والولادة من جديد",
-    shadowP1: "يرتبط مساري الروحي ارتباطاً عميقاً بعمل الظل. أنا مهتمة بالأجزاء التي نخفيها حتى عن أنفسنا؛ المخاوف، والجراح، والتناقضات، والمشاعر المكبوتة، وحالات عدم الأمان، والأنماط اللاواعية التي تشكّل حياتنا بصمت.",
-    shadowP2: "رسالتي ليست أن نمجّد الظلام. بل أن نصبح واعين به. لأن ما نرفض مواجهته لا يختفي بالضرورة. وأحياناً يستمر ببساطة في التأثير فينا من مكان لا نستطيع رؤيته.",
-    shadowP3: "كانت هناك مراحل شعرت فيها وكأنني احترقت بالكامل. لكنني عدت. ولم أعد كما كنت. عدت حاملة رماد من كنتها ذات يوم، وبنيت من ذلك الرماد شيئاً جديداً.",
-    shadowP4: "وهذا هو معنى الولادة الجديدة بالنسبة إليّ. ليست محو الماضي. وليست التظاهر بأن النار لم تحدث. بل أن أصبح واعية بما نجا منها.",
-    alchemyTitle: "الخيمياء والرواقية",
-    alchemyP1: "هناك فكرتان تنسجمان بعمق مع الطريقة التي أنظر بها إلى التحوّل: الخيمياء والرواقية. الخيمياء بالنسبة إليّ هي استعارة للتحوّل؛ أن آخذ ما يبدو مكسوراً أو مؤلماً أو عادياً، وأحوّل معناه إلى شيء واعٍ وذي قيمة.",
-    alchemyP2: "أما الرواقية فتذكّرني بأهمية الانضباط، والسيادة الداخلية، والتقبّل، وتوجيه طاقتي نحو ما أستطيع فعلاً التأثير فيه. ومعاً، تمثلان شيئاً أعمل باستمرار على الوصول إليه: أن أتحوّل دون أن أفقد نفسي، وأن أتقبّل دون أن أستسلم، وأن أشعر دون أن أُستهلك، وأن أعيد بناء نفسي دون أن أنسى من أين أتيت.",
-    academicTitle: "مساري الأكاديمي والمهني",
-    academicP1: "قد تبدو اهتماماتي متفرقة للوهلة الأولى، لكن هناك خيطاً يربط بينها: أريد أن أفهم الإنسان والأنظمة التي تشكّل عالمنا معاً.",
-    academicP2: "حصلت على شهادة البكالوريا في شعبة تقني رياضي، تخصص هندسة مدنية، ثم أكملت درجة الماجستير في اللسانيات الإنجليزية. وبالتوازي مع تعليمي الأكاديمي، درست بشكل مستقل مجالات في علم النفس، بما في ذلك علم النفس غير السوي وبعض جوانب علم النفس المظلم، إلى جانب تطوير الويب والتكنولوجيا.",
-    academicP3: "وأعمل حالياً على تطوير معرفتي في البرمجة والأمن السيبراني، مع هدف طويل المدى يتمثل في أن أصبح: مهندسة أنظمة الروبوتات والأنظمة الذاتية — متخصصة في استكشاف البيئات القصوى.",
-    academicP4: "أريد أن أعمل على تطوير أنظمة روبوتية ذاتية قادرة على استكشاف البيئات الصعبة أو الخطرة أو التي يصعب على البشر الوصول إليها، بما في ذلك البيئات القصوى على الأرض، وربما خارجها مستقبلاً.",
-    nowTitle: "ما أفعله الآن",
-    nowP1: "كان التعليم أحد أكثر الجوانب استمرارية في حياتي. أعمل مدرّسة للغة الإنجليزية وأستاذة جامعية، كما أعمل في التعليم الخاص والعمل الحر. لدي ما يقارب أربع سنوات من الخبرة في التدريس عبر قطاعات تعليمية مختلفة.",
-    nowP2: "يسمح لي التعليم بالجمع بين اللغة، والتواصل، والإبداع، وفهم الإنسان. وفي الوقت نفسه، أواصل بناء مستقبلي في التكنولوجيا، والبرمجة، والأمن السيبراني، والروبوتات.",
-    interestsTitle: "العوالم الكثيرة التي تثير اهتمامي",
-    interestsP1: "لم أستطع يوماً أن أحصر فضولي في مجال واحد. ما يجمع كل هذه الاهتمامات ليس موضوعاً واحداً. بل هو فضولي تجاه ما يكمن خلف الأشياء الظاهرة.",
-    aestheticTitle: "جماليّتي",
-    aestheticP1: "جماليّتي بديلة، لكنها لا تحب أن تبقى داخل قالب واحد. أتنقل بين الـNu-Goth، والـTraditional Goth، والقوثيك، وأحياناً الـBoho.",
-    aestheticP2: "أنجذب إلى الأسود، والأزرق العميق، والظلام الكوني، والكسوف، والقمر، والعناصر العتيقة، والعمارة القوطية، وحوريات البحر، ومصاصي الدماء، والأفاعي، والظلال، والرموز القديمة.",
-    aestheticP3: "أحب الظلام عندما يكون أنيقاً وغامضاً وذا معنى، وليس مبالغاً فيه. وبالنسبة إليّ، لا يعني الظلام بالضرورة شيئاً سلبياً. فأحياناً يكون الظلام ببساطة هو المكان الذي تصبح فيه الأشياء المخفية مرئية.",
-    animalsTitle: "حيواناتي الرمزية",
-    animalsP1: "أرى هذه الحيوانات بوصفها رموزاً وأرشيتيبات شخصية تعبّر عن صفات وموضوعات تتناغم مع رحلتي.",
-    cosmicTitle: "مخططي الكوني",
-    cosmicP1: "وفقاً لنظام الخريطة الفلكية الذي أتبعه:",
-    languagesTitle: "لغاتي",
-    languagesP1: "أتحدث: العربية • الإنجليزية • الفرنسية. وأتعلم حالياً: اليابانية • الألمانية • الإيطالية.",
-    languagesP2: "تثير اللغات اهتمامي لأن لكل لغة رؤيتها الخاصة للعالم، وإيقاعها، وطريقتها في التعبير عن الواقع.",
-    charactersTitle: "الشخصيات والطاقة التي أجد صدى لها",
-    charactersP1: "هناك شخصيات خيالية تثير اهتمامي بسبب رمزيتها، وتعقيدها، وحضورها. تجذبني الشخصيتان Makima وEsdeath من ناحية الأرشيتيبات الخيالية التي تمثلانها. كما تمثل Effy Stonem وHannibal Lecter نوعاً من الشخصيات الخيالية المعقدة نفسياً والمظلمة التي أحب استكشافها.",
-    charactersP2: "أما من ناحية طاقة المشاهير وحضورهم الجمالي، فإن Megan Fox من الشخصيات التي أجد مظهرها وحضورها لافتين جداً — ونعم، هي الـCelebrity Crush الخاصة بي. وهذه مجرد مراجع خيالية وجمالية تتناغم معي، ولا تعني أنني أعتبر نفسي مطابقة لهذه الشخصيات.",
-    personalTitle: "جانب شخصي من قصتي",
-    personalP1: "أعرّف نفسي بأنني Aroace — لا رومانسية ولا جنسية. كما أنني أعيش تجارب مرتبطة بـ اضطراب الشخصية الحدّية والتعلّق التجنّبي، وقد أثرت هذه التجارب في بعض جوانب رحلتي مع الحدود العاطفية، والعلاقات، وفهم الذات، والشفاء.",
-    personalP2: "لكنني أرفض اختزال نفسي في تشخيص أو تصنيف أو فصل صعب من حياتي. صعوباتي جزء من قصتي. لكنها ليست كل ما أنا عليه.",
-    buildTitle: "ما أريد أن أبنيه",
-    buildP1: "في النهاية، يعود كل شيء إلى شيء واحد: الخَلْق. لا أريد أن تنتهي رحلتي بمجرد فهم نفسي. أريد أن أخلق. أن أتعلّم. أن أبني. أن أستكشف. أن أعلّم. أن أكتب. أن أصمّم. أن أجرّب. وأن أربط بين عوالم قد تبدو منفصلة عن بعضها.",
-    buildP2: "أريد أن أجمع بين الإنسان والتكنولوجيا، وعلم النفس والفلسفة، والغموض والعلم، والأرض والكون. قد تتغير طريقي وتفاصيلها مع مرور الوقت. لكن الاتجاه يبقى واحداً: أن أصبح أكثر وعياً، وأكثر قدرة، وأكثر نفعاً، وأن أبني في النهاية شيئاً يتجاوز وجودي الشخصي ويضيف شيئاً ذا معنى إلى الإنسانية.",
-    whyTitle: "وأخيراً — لماذا ليليث؟",
-    whyP1: "لأن ليليث ليست مجرد جمالية. إنها رمز لرحلة. رحلة من التشتّت نحو التكامل. ومن الخوف نحو الفهم. ومن الجراح نحو الشفاء. ومن الأنماط اللاواعية نحو الوعي. ومن الهدم نحو إعادة البناء. ومن الظلام نحو الحكمة الكامنة فيه.",
-    whyP2: "وربما الأهم من كل ذلك: أن أنتقل من البحث عن الإجابة خارج ذاتي، إلى تعلّم كيفية العودة إلى نفسي.",
-    whyP3: "لقد كنت نسخاً كثيرة من نفسي. بعضها أحببته. وبعضها تجاوزته. وبعضها اضطررت إلى تركه خلفي. وبعضها كسرني. وبعضها أنقذني. وبعضها ما زلت أكتشفه.",
-    whyP4: "رحلتي ليست في اختيار النور على حساب الظلام، أو الظلام على حساب النور. بل في تعلّم كيفية احتوائهما معاً. ليس القلب في مواجهة العقل، بل القلب مع العقل. وليست الروح في مواجهة المادة، بل الروح داخل الوجود. وليس الظلام في مواجهة النور، بل فهم الحكمة التي يمكن أن يحملها كل منهما. وليس تدمير الظل، بل مواجهته. وليس أن أصبح شخصاً آخر، بل أن أصبح أكثر اكتمالاً في كينونتي.",
-    whyFinal: "أنا ليليث. ما زلت أتعلم. وما زلت أتعافى. وما زلت أطرح الأسئلة. وما زلت أتحوّل. وما زلت في طور التشكّل.",
-    whyFinalP: "وربما هذا هو المعنى الحقيقي لليليث بالنسبة إليّ: ليست هوية مكتملة، بل تحوّل مستمر.",
+    back: '← العودة إلى الكسوف',
+    title: 'ليليث',
+    subtitle: 'VAMPIRE • SIREN',
+    langToggle: 'English',
+    introLabel: 'التعرّف إلى ليليث',
+    introText: 'هناك الكثير مما يقف خلف اسم «ليليث».',
+    footerText:
+      'اكتبها. اشعر بها. تحرر منها. ثم عُد إلى ذاتك.',
+
+    cards: [
+      {
+        id: 'getting-to-know',
+        number: '٠١',
+        title: 'التعرّف إلى ليليث',
+        category: 'الاسم',
+        accent: 'red',
+        content: [
+          'هناك الكثير مما يقف خلف اسم «ليليث».',
+          'ليليث هو الاسم الذي اخترته لنفسي، لكنه بالنسبة إليّ يتجاوز كونه مجرد اسم مستعار. إنه يمثل جانبًا من شخصيتي، وجمالي، وطاقة حضوري، والطريقة التي أنظر بها إلى العالم. وبشكل ما، ظل هذا الاسم يطاردني منذ طفولتي، قبل وقت طويل من أن أفهم تمامًا سبب انجذابي إليه.',
+          'أصبح الاسم رمزًا لأجزاء مني لم أكن أستطيع دائمًا تفسيرها: الفضول، والظلام، والاستقلال، والتحول، والغموض، والأنوثة، والتأمل في الذات، والرغبة المستمرة في فهم ما يكمن تحت السطح.',
+          'لذلك، عندما تعرفني باسم ليليث، فأنت لا تعرف مجرد لقب. أنت ترى جزءًا من حقيقتي.',
+          'أما «Eclipse» — الكسوف — فيحمل معنى خاصًا بالنسبة إليّ أيضًا. فهو يشير إلى أسطورة يابانية تُروى عن الشمس والقمر، إذ كانا يحبان بعضهما، لكنهما كانا يوجدان في أوقات مختلفة، ولذلك لم يكن بوسعهما أن يلتقيا. ووفقًا للأسطورة، خلق الله الكسوف حتى يتمكنا من اللقاء، ولو للحظات قليلة.',
+          'بالنسبة إليّ، تختصر هذه الصورة فكرة أن الحب المستحيل قد لا يكون مستحيلًا في جوهره، وإنما قد تفصل بينه وبين اللقاء ظروف لا تدوم إلى الأبد. ولهذا ارتبط معنى الكسوف لديّ أيضًا بقصة توأم الشعلة كما أفهمها.'
+        ]
+      },
+
+      {
+        id: 'about',
+        number: '٠٢',
+        title: 'قليل عني',
+        category: 'الهوية',
+        content: [
+          'أنا في أواخر العشرينيات من عمري.',
+          'أنا جزائرية وأعيش حاليًا في الجزائر، ولديّ أصول تركية.',
+          'أميل إلى أن أكون شخصية شديدة الخصوصية، ولذلك أفضل الاحتفاظ ببعض جوانب هويتي لنفسي. فأنا أؤمن بأن ليس كل ما هو عميق أو ذو معنى في الإنسان يجب أن يكون مكشوفًا أمام الجميع.',
+          'أنا شخص لا يتوقف عن التعلم، والتساؤل، والإبداع، وإعادة بناء ذاته.',
+          'ولا أظن أنني كنت يومًا مهتمة بالعيش على سطح الأشياء فقط.',
+          'أريد أن أعرف: لماذا؟',
+          'لماذا يتصرف الناس بالطريقة التي يتصرفون بها؟ لماذا نصبح ما نصبح عليه؟ لماذا تتكرر رموز معينة عبر التاريخ؟ لماذا نحلم؟ لماذا تتطور الثقافات بطرق مختلفة؟ لماذا يخاف البشر من أشياء بعينها؟ ولماذا ننجذب إلى الظلام والجمال والغموض والمجهول؟',
+          'إنني مفتونة بالطبقات الخفية التي تكمن تحت الحياة اليومية.'
+        ]
+      },
+
+      {
+        id: 'education',
+        number: '٠٣',
+        title: 'التعليم والمعرفة',
+        category: 'المعرفة',
+        content: [
+          'خلفيتي الأكاديمية متنوعة إلى حد كبير.',
+          'حصلت على شهادة البكالوريا في الرياضيات التقنية، تخصص الهندسة المدنية.',
+          'ثم تابعت دراستي للحصول على درجة الماجستير في اللسانيات الإنجليزية.',
+          'وإلى جانب تعليمي الأكاديمي، درست بشكل مستقل العديد من المجالات التي تثير اهتمامي، من بينها علم النفس، وعلم النفس غير السوي، وعلم النفس الجنائي، والسلوك البشري، وما يُشار إليه عادةً بعلم النفس المظلم.',
+          'كما أمتلك خلفية في تطوير الويب، وأعمل حاليًا على توسيع معرفتي بالبرمجة، والأمن السيبراني، والروبوتات، والذكاء الاصطناعي، والأنظمة المستقلة.',
+          'بالنسبة إليّ، لا تنتهي رحلة التعلم عند الحصول على شهادة.',
+          'أريد أن أصبح شخصًا قادرًا على التنقل بين عوالم مختلفة من المعرفة، بدلًا من أن أحصر نفسي في مجال واحد فقط.'
+        ]
+      },
+
+      {
+        id: 'career',
+        number: '٠٤',
+        title: 'ماذا أفعل؟',
+        category: 'المهنة والمستقبل',
+        content: [
+          'أعمل حاليًا كمدرّسة للغة الإنجليزية في الجامعة، وفي مدرسة خاصة، كما أعمل بشكل مستقل.',
+          'لديّ ما يقارب أربع سنوات من الخبرة في التدريس ضمن قطاعات تعليمية مختلفة.',
+          'التدريس جزء من حياتي، لكنه ليس الاتجاه الوحيد الذي أسعى إليه.',
+          'كما أعمل على الوصول إلى حلم أكبر بكثير: مهندسة في الروبوتات والأنظمة المستقلة، مع التخصص في استكشاف البيئات القصوى.',
+          'أريد أن أعمل عند نقطة التقاء الروبوتات، والأنظمة المستقلة، والتكنولوجيا، والاستكشاف، والعلوم، وأن أساهم في بناء أنظمة قادرة على الوصول إلى أماكن يصعب على الإنسان الوصول إليها.',
+          'يمتد فضولي من أعماق المحيطات إلى اتساع الفضاء.',
+          'أريد أن أستكشف المجهول من خلال التكنولوجيا.'
+        ]
+      },
+
+      {
+        id: 'mind',
+        number: '٠٥',
+        title: 'الأشياء التي تشغل ذهني',
+        category: 'الفضول',
+        content: [
+          'من أصعب الأمور بالنسبة إليّ أن ألخّص اهتماماتي، لأنها تمتد في اتجاهات كثيرة.',
+          'أهتم بشدة بعمل الظل، وعلم النفس، وعلم النفس غير السوي، وعلم النفس الجنائي، والسلوك البشري، وعلم الأعصاب، والفلسفة، والذكاء العاطفي، ولغة الجسد، وخرائط الميلاد وعلم التنجيم، والروحانيات، والأساطير، والحضارات القديمة، والثقافة اليونانية القديمة، والثقافة اليابانية، والرموز القديمة، وعلم الرموز، وعلم الفلك، والفضاء، وأطوار القمر، ونظريات الأكوان المتوازية، ومعاني الأحلام، والحلم الواعي، والغموض، والرعب، والجرائم الحقيقية، ووثائقيات الجرائم، والجماليات القوطية، وDark Academia، والجماليات الكونية والقديمة، وسرد القصص، والفن والموسيقى، والمعاني الخفية في الأفلام والموسيقى، والثقافات واللغات، والتكنولوجيا والذكاء الاصطناعي، والتأمل، وترددات الطاقة، والعلاج بالطاقة، والتجلّي، والتاروت، وتطوير الذات، واللياقة والحياة الصحية، والحيوانات.',
+          'وربما الأهم من كل ذلك: أحب فهم الأشياء التي تجعل الإنسان يتوقف للحظة ويسأل: لماذا؟'
+        ]
+      },
+
+      {
+        id: 'aesthetic',
+        number: '٠٦',
+        title: 'جمالي البصري',
+        category: 'اللغة البصرية',
+        type: 'tags',
+        tags: [
+          'ALTERNATIVE',
+          'GOTHIC',
+          'NU-GOTH',
+          'TRADITIONAL GOTH',
+          'BOHO',
+          'DARK ACADEMIA',
+          'COSMIC',
+          'VINTAGE',
+          'VAMPIRE',
+          'SIREN',
+          'ECLIPSE',
+          'MIDNIGHT BLUE',
+          'BLACK',
+          'BLOOD RED',
+          'MOONLIGHT',
+          'MYSTERY'
+        ],
+        content: [
+          'جمالي البصري يميل إلى البديل والقوطي، لكنني لا أحب أن أحصر نفسي في تصنيف واحد.',
+          'أميل أحيانًا إلى الـNu-Goth، وأحيانًا إلى القوطي التقليدي، وأحيانًا إلى الـBoho، وأحيانًا إلى شيء أكثر ظلمة أو كونية أو قِدمًا أو غموضًا، أو ببساطة إلى شيء يستعصي على التصنيف.',
+          'أحب اجتماع الظلام مع الأناقة، والغموض مع الأنوثة، والرمزية الكونية مع الجمال.',
+          'أنجذب إلى الأسود، والأزرق الداكن، والكسوفات، والثعابين، والغربان، والرموز القديمة، وضوء القمر، والطقس الماطر، والعمارة القوطية، والصور ذات الطابع العتيق، والأماكن الغامضة، والمشاهد الكونية، وكل ما يوحي بأنه ينتمي إلى منطقة تقع بين الواقع والحلم.'
+        ]
+      },
+
+      {
+        id: 'animals',
+        number: '٠٧',
+        title: 'حيواناتي الروحية',
+        category: 'الرمزية',
+        type: 'animals',
+        animals: [
+          {
+            label: 'الحيوان الروحي الأساسي',
+            name: 'SNAKE',
+            title: 'التحول • الولادة من جديد • الحكمة الخفية',
+            description:
+              'يمثل الثعبان التحول، والتجدد، والحكمة الخفية. وكما يتخلى الثعبان عن جلده القديم، أرى نفسي شخصًا يتغير باستمرار، ويترك نسخًا قديمة من ذاته خلفه، ويبحث عن حقائق أعمق. وهو يعكس انجذابي إلى عمل الظل، واكتشاف الذات، والتحول، والنمو الشخصي.'
+          },
+          {
+            label: 'حيوان الدليل',
+            name: 'OWL',
+            title: 'الحدس • البصيرة • الملاحظة',
+            description:
+              'تمثل البومة الحدس، والبصيرة، ودقة الملاحظة، والقدرة على رؤية ما قد يغفل عنه الآخرون. وهي ترمز إلى رغبتي في فهم ما يكمن خلف الظاهر.'
+          },
+          {
+            label: 'حيوان الظل',
+            name: 'RAVEN',
+            title: 'الغموض • اللاوعي • التحول',
+            description:
+              'يمثل الغراب الغموض، واللاوعي، والتحول، والحكمة التي يمكن العثور عليها في الظلام. وهو يعكس استعدادي لاستكشاف المشاعر الصعبة، والأسئلة المزعجة، والجوانب التي يفضّل الناس أحيانًا تجنب مواجهتها.'
+          },
+          {
+            label: 'الحيوان الحامي',
+            name: 'BLACK JAGUAR',
+            title: 'القوة • الحماية • الغريزة',
+            description:
+              'يمثل اليغور الأسود القوة، والحماية، والشجاعة، والغريزة، والسيطرة على الظل. ويذكّرني بالوقوف في قوتي الخاصة والثقة بنفسي عندما أعبر مناطق عدم اليقين.'
+          },
+          {
+            label: 'حيوان الرؤية العليا',
+            name: 'EAGLE',
+            title: 'الحرية • الرؤية • المنظور',
+            description:
+              'يمثل النسر الحرية، والاستقلال، والرؤية، والقدرة على رؤية الصورة الأكبر. وهو يعكس رغبتي في تجاوز القيود، وصنع طريقي الخاص، وفهم الحياة من منظور أوسع.'
+          }
+        ],
+        content: [
+          'هذه الحيوانات تمثل رموزًا وصفات وموضوعات نفسية أشعر بأنها تعبّر عن جوانب مختلفة مني.'
+        ]
+      },
+
+      {
+        id: 'zodiac',
+        number: '٠٨',
+        title: 'خريطتي الكونية',
+        category: 'علم التنجيم',
+        type: 'zodiac',
+        zodiac: [
+          {
+            placement: 'الطالع',
+            sign: 'الأسد'
+          },
+          {
+            placement: 'الشمس',
+            sign: 'الثور'
+          },
+          {
+            placement: 'القمر',
+            sign: 'العذراء'
+          },
+          {
+            placement: 'الزهرة',
+            sign: 'الجوزاء'
+          },
+          {
+            placement: 'عطارد',
+            sign: 'الحمل'
+          },
+          {
+            placement: 'المريخ',
+            sign: 'العقرب'
+          },
+          {
+            placement: 'ليليث',
+            sign: 'العقرب'
+          }
+        ],
+        content: [
+          'مواقعي الفلكية هي: الطالع في الأسد، والشمس في الثور، والقمر في العذراء، والزهرة في الجوزاء، وعطارد في الحمل، والمريخ في العقرب، وليليث في العقرب.',
+          'علم التنجيم أحد الأنظمة الرمزية التي أحب استكشافها، لأنني أجد فيه لغة مثيرة للتأمل في الشخصية، والرموز، والنماذج النفسية، ومعاني الذات.'
+        ]
+      },
+
+      {
+        id: 'personality',
+        number: '٠٩',
+        title: 'شخصيتي',
+        category: 'MBTI',
+        type: 'mbti',
+        mbti: {
+          type: 'INTJ-T',
+          title: 'THE ARCHITECT',
+          description:
+            'أميل بطبيعتي إلى الاستراتيجية، والاستقلالية، والملاحظة، والتحليل، والتفكير بعيد المدى، وفهم الأنظمة والبنى التي تقف خلف الأشياء.'
+        },
+        content: [
+          'أستمتع بفهم الأشياء والوصول إلى استنتاجاتي بنفسي.',
+          'أميل إلى التساؤل بدلًا من قبول الأشياء كما هي، وأقدّر العمق أكثر من السطحية.',
+          'لا أرى MBTI تعريفًا كاملًا لهويتي، بل أتعامل معه كإطار يساعدني على وصف بعض الميول في طريقة تفكيري، ومعالجتي للمعلومات، وتعاملي مع العالم.'
+        ]
+      },
+
+      {
+        id: 'languages',
+        number: '١٠',
+        title: 'اللغات',
+        category: 'الثقافة والتواصل',
+        type: 'languages',
+        languages: {
+          current: [
+            {
+              language: 'العربية',
+              level: 'أتحدثها'
+            },
+            {
+              language: 'الإنجليزية',
+              level: 'أتحدثها'
+            },
+            {
+              language: 'الفرنسية',
+              level: 'أتحدثها'
+            }
+          ],
+          learning: [
+            {
+              language: 'اليابانية'
+            },
+            {
+              language: 'الألمانية'
+            },
+            {
+              language: 'الإيطالية'
+            }
+          ]
+        },
+        content: [
+          'اللغات تثير اهتمامي لأن تعلم لغة جديدة لا يعني حفظ المفردات فحسب.',
+          'إنه دخول إلى ثقافة أخرى، وطريقة أخرى في التفكير، وأحيانًا إلى نسخة أخرى من الذات.'
+        ]
+      },
+
+      {
+        id: 'hobbies',
+        number: '١١',
+        title: 'ماذا أفعل في وقت فراغي؟',
+        category: 'خارج السجل',
+        content: [
+          'لديّ من الهوايات ما يكفي لأن يصعب اختزالها في واحدة فقط.',
+          'أحب القراءة، والكتابة، والطبخ — فهو يبعث في نفسي الهدوء فعلًا — واللياقة البدنية، واليوغا، والكروشيه رغم أنني ما زلت مبتدئة فيه، وتعلم الأشياء العشوائية لمجرد الفضول، ومشاهدة وثائقيات الجرائم، واستكشاف الأساطير، ودراسة علم النفس، والاستماع إلى الموسيقى، وسرد القصص، وتحليل الأفلام وما تخفيه من معانٍ.',
+          'أنا من النوع الذي يمكنه أن يقضي ساعات في الغوص داخل موضوع بحثي غير متوقع، فقط لأن سؤالًا واحدًا قادني إلى سؤال آخر.'
+        ]
+      },
+
+      {
+        id: 'characters',
+        number: '١٢',
+        title: 'شخصيات تمثل جوانب مختلفة مني',
+        category: 'النماذج الخيالية',
+        type: 'characters',
+        characters: [
+          {
+            name: 'MAKIMA',
+            description:
+              'تمثل بعض جوانب النموذج الأنثوي القوي، المتحكم، والمهيب الذي يثير اهتمامي.'
+          },
+          {
+            name: 'ESDEATH',
+            description:
+              'تمثل جانبًا آخر من النموذج الأنثوي القوي، الحازم، والمسيطر الذي أجده مثيرًا للاهتمام من الناحية النفسية.'
+          },
+          {
+            name: 'EFFY STONEM',
+            description:
+              'تمثل التعقيد، والتناقض العاطفي، والغموض، والهشاشة، والانفصال العاطفي.'
+          },
+          {
+            name: 'HANNIBAL',
+            description:
+              'يمثل افتتاني بالذكاء، وعلم النفس، والجماليات، والرمزية، والفلسفة، والجوانب الأكثر ظلمة في الطبيعة البشرية.'
+          }
+        ],
+        content: [
+          'هذه الشخصيات لا تمثلني حرفيًا، ولا أعتبر نفسي نسخة منها. إنما أجد أجزاء مختلفة من نماذجها الرمزية والنفسية مثيرة للاهتمام.'
+        ]
+      },
+
+      {
+        id: 'energy',
+        number: '١٣',
+        title: 'الطاقة التي أنجذب إليها',
+        category: 'الانجذاب والجماليات',
+        type: 'celebrity',
+        celebrity: {
+          name: 'MEGAN FOX',
+          description:
+            'إذا أردت وصف نوع الجمال والطاقة التي أنجذب إليها بطبيعتي، فربما تكون ميغان فوكس أقرب مرجع معروف يمكن أن أستحضره. وهي أيضًا الـcelebrity crush الخاصة بي، لذلك نعم، هناك ذلك أيضًا.'
+        },
+        content: []
+      },
+
+      {
+        id: 'personal',
+        number: '١٤',
+        title: 'جانب أكثر خصوصية مني',
+        category: 'شخصي',
+        type: 'personal',
+        accent: 'red',
+        personal: [
+          {
+            label: 'الميول العاطفية والجنسية',
+            value: 'AROACE',
+            description:
+              'أعرّف نفسي بأنني لا رومانسية ولا جنسية.'
+          },
+          {
+            label: 'الانجذاب',
+            value: 'SAPIOSEXUAL',
+            description:
+              'ينجذب اهتمامي بصورة خاصة إلى الذكاء، وعمق التفكير، والاتصال الفكري ذي المعنى.'
+          },
+          {
+            label: 'نظرتي إلى الإنجاب',
+            value: 'لا إنجابية',
+            description:
+              'أتوافق مع الفلسفة اللاإنجابية، وهي موقف فلسفي يتناول الأبعاد الأخلاقية والنتائج المترتبة على جلب حياة جديدة إلى الوجود.'
+          },
+          {
+            label: 'الفلسفة',
+            value: 'الخيمياء • الرواقية',
+            description:
+              'الخيمياء والرواقية إطاران فكريان ورمزيان يؤثران في نظرتي إلى التحول، والانضباط، والمعاناة، والمعنى، وإتقان الذات، وعملية التكوّن.'
+          },
+          {
+            label: 'تجربة شخصية',
+            value: 'اضطراب الشخصية التجنّبية',
+            description:
+              'هذا جزء من تجربتي الشخصية، وقد أثّر في الطريقة التي أفهم بها الحدود، والهشاشة، والعلاقات، والهوية، والوعي بالذات.'
+          }
+        ],
+        content: [
+          'أعرّف نفسي بأنني لا رومانسية ولا جنسية — AROACE.',
+          'كما أصف نوع الانجذاب لديّ بأنه SAPIOSEXUAL، خصوصًا بمعنى أن الذكاء، وعمق التفكير، والاتصال الفكري الحقيقي عوامل ذات أهمية كبيرة بالنسبة إليّ.',
+          'اللاإنجابية جزء أيضًا من رؤيتي الفلسفية، إلى جانب اهتمامي بالخيمياء والرواقية.',
+          'وأعيش مع اضطراب الشخصية التجنّبية، وهو جزء من تجربتي الشخصية، لكنني لا أريد له أن يتحول إلى تعريف كامل لي.',
+          'هذه كلها أجزاء من قصتي، وليست كل قصتي.'
+        ]
+      },
+
+      {
+        id: 'why',
+        number: '١٥',
+        title: 'لماذا «ليليث»؟',
+        category: 'الجوهر',
+        accent: 'red',
+        content: [
+          'ربما تكون أسهل طريقة لشرح كل ما سبق هي التالية:',
+          'لطالما انجذبت إلى الأشياء التي توجد بين المتناقضات.',
+          'النور والظلام. العلم والغموض. المنطق والحدس. الجمال والرعب. المادي والرمزي. المعروف والمجهول.',
+          'لا أريد أن أختار جانبًا واحدًا فقط.',
+          'أريد أن أستكشف المساحة الواقعة بينهما.',
+          'وهذا هو ما تمثله لي ليليث.',
+          'ليست الكمال. وليست الظلام لمجرد الظلام. بل الفضول، والتحول، والاستقلال، والعمق، والشجاعة اللازمة للنظر تحت السطح.',
+          'ما زلت في طور التكوّن.',
+          'ما زلت أتعلم.',
+          'ما زلت أخلع جلودي القديمة.',
+          'ما زلت أطرح الأسئلة.',
+          'وما زلت أبني الإنسانة التي أريد أن أصبحها.',
+          'وربما يكون هذا أدق تعريف يمكنني أن أقدمه لكم:',
+          'أنا ليليث — وما زلت أكتشف ما الذي يعنيه ذلك.'
+        ]
+      }
+    ]
   }
 }
 
 export default function WhoIsLilithPage() {
-  const [lang, setLang] = useState<'en' | 'ar'>('en');
-  const t = CONTENT[lang];
-  const isRTL = lang === 'ar';
+  const [lang, setLang] = useState<'en' | 'ar'>('en')
+  const [activeCard, setActiveCard] = useState<string | null>(null)
+
+  const t = CONTENT[lang]
+  const isRTL = lang === 'ar'
+
+  const activeCardData = t.cards.find(
+    (card) => card.id === activeCard
+  )
 
   return (
-    <div className={`relative min-h-screen text-white font-nav selection:bg-blood/30 selection:text-white ${isRTL ? 'font-arabic' : ''}`}>
-      
-      {/* --- BACKGROUND VIDEO & ANIMATION LAYER --- */}
-      <div className="fixed inset-0 z-0 overflow-hidden bg-obsidian pointer-events-none">
-        {/* The Video — mobile autoplay compatible */}
+    <div
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className={`relative min-h-screen overflow-hidden bg-black text-white ${
+        isRTL ? 'font-arabic' : 'font-nav'
+      }`}
+    >
+      {/* =========================================================
+          EXISTING VIDEO BACKGROUND
+          DO NOT REPLACE — /lilith-bg.mp4
+          ========================================================= */}
+
+      <div className="fixed inset-0 z-0 overflow-hidden bg-black pointer-events-none">
         <video
-          ref={(el) => {
-            if (!el) return
-            el.muted = true
-            el.defaultMuted = true
-            el.volume = 0
-            el.setAttribute('muted', '')
-            el.setAttribute('playsinline', '')
-            el.setAttribute('webkit-playsinline', 'true')
-            const tryPlay = () => {
-              const p = el.play()
-              if (p && typeof p.catch === 'function') {
-                p.catch(() => {
-                  setTimeout(() => el.play().catch(() => {}), 300)
-                  setTimeout(() => el.play().catch(() => {}), 1200)
-                })
-              }
-            }
-            tryPlay()
-          }}
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
-          // @ts-ignore
-          webkit-playsinline="true"
-          disablePictureInPicture
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
-          style={{
-            pointerEvents: 'none',
-            WebkitTransform: 'translateZ(0)',
-            transform: 'translateZ(0)',
-          }}
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover opacity-40"
         >
           <source src="/lilith-bg.mp4" type="video/mp4" />
-          <source src="/lilith-bg.webm" type="video/webm" />
         </video>
 
-        {/* Dark Cinematic Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-obsidian/50 to-obsidian/80" />
-        
-        {/* Subtle Crimson & Blue Atmospheric Fog */}
-        <div className="absolute top-[20%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-blood/10 blur-[150px] animate-slow-drift" />
-        <div className="absolute bottom-[10%] right-[15%] w-[35vw] h-[35vw] rounded-full bg-siren/15 blur-[120px] animate-slow-drift" style={{ animationDelay: '-15s' }} />
+        <div className="absolute inset-0 bg-black/45" />
 
-        {/* Floating Particles */}
-        {[...Array(30)].map((_, i) => {
-          const isCrimson = i % 7 === 0;
-          const size = Math.random() * 2 + 1;
-          const left = Math.random() * 100;
-          const top = Math.random() * 100;
-          const delay = Math.random() * 15;
-          const duration = Math.random() * 20 + 15;
-          return (
-            <div
-              key={i}
-              className={`absolute rounded-full animate-float-particle ${isCrimson ? "bg-blood/50" : "bg-silver/30"}`}
-              style={{
-                width: `${size}px`, height: `${size}px`, left: `${left}%`, top: `${top}%`,
-                animationDelay: `${delay}s`, animationDuration: `${duration}s`,
-                boxShadow: isCrimson ? '0 0 4px rgba(92,10,18,0.6)' : '0 0 6px rgba(170,183,200,0.4)'
-              }}
-            />
-          );
-        })}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/90" />
       </div>
 
-      {/* --- MAIN CONTENT --- */}
-      <div className={`relative z-10 ${isRTL ? 'text-right' : 'text-left'}`}>
-        
-        {/* Top Navigation */}
-        <div className="fixed top-6 left-6 right-6 z-50 flex justify-between items-center">
-          <Link 
-            href="/space" 
-            className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase text-silver/80 hover:text-sovereign transition-colors bg-obsidian/80 backdrop-blur-md px-4 py-2 rounded-full border border-silver/20 hover:border-sovereign/60"
+      {/* =========================================================
+          MAIN
+          ========================================================= */}
+
+      <main className="relative z-10 min-h-screen">
+
+        {/* NAVIGATION */}
+
+        <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 md:px-10 lg:px-16">
+          <Link
+            href="/"
+            className="text-[9px] tracking-[0.35em] text-white/55 transition-colors hover:text-white"
           >
             {t.back}
           </Link>
-          
-          <button 
-            onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-            className="text-[10px] tracking-[0.3em] uppercase text-silver/80 hover:text-sovereign transition-colors bg-obsidian/80 backdrop-blur-md px-4 py-2 rounded-full border border-silver/20 hover:border-sovereign/60"
-          >
-            {lang === 'en' ? 'العربية' : 'English'}
-          </button>
-        </div>
 
-        {/* HERO */}
-        <section className="pt-40 pb-24 px-6 text-center flex flex-col items-center justify-center min-h-[70vh]">
-          <div className="mb-8 text-silver text-xl md:text-2xl tracking-[0.5em] animate-pulse-glow drop-shadow-[0_0_10px_rgba(170,183,200,0.5)]">
-            {t.symbol}
+          <button
+            onClick={() => setLang(isRTL ? 'en' : 'ar')}
+            className="border border-white/20 px-4 py-2 text-[9px] tracking-[0.3em] text-white/65 transition-all hover:border-white/60 hover:text-white"
+          >
+            {t.langToggle}
+          </button>
+        </header>
+
+        {/* =======================================================
+            HERO
+            ======================================================= */}
+
+        <section className="mx-auto flex min-h-[72vh] w-full max-w-7xl items-center px-6 py-24 md:px-10 lg:px-16">
+          <div className="max-w-5xl">
+
+            <div className="mb-8 flex items-center gap-4">
+              <span className="h-px w-14 bg-red-800" />
+
+              <span className="text-[9px] tracking-[0.45em] text-white/40">
+                {t.introLabel}
+              </span>
+            </div>
+
+            <h1 className="text-[clamp(5rem,16vw,14rem)] font-light leading-[0.72] tracking-[-0.08em] text-white">
+              {t.title}
+            </h1>
+
+            <div className="mt-10 flex items-center gap-5">
+              <span className="h-px w-20 bg-white/50" />
+
+              <span className="text-[9px] tracking-[0.5em] text-white/55">
+                {t.subtitle}
+              </span>
+            </div>
+
+            <div className="mt-14 max-w-2xl">
+              <p className="text-sm font-light leading-8 text-white/55 md:text-base md:leading-9">
+                {t.introText}
+              </p>
+            </div>
+
+            <div className="mt-16 flex items-center gap-4">
+              <span className="text-[8px] tracking-[0.4em] text-white/25">
+                01 — 15
+              </span>
+
+              <span className="h-px w-20 bg-white/15" />
+
+              <span className="text-[8px] tracking-[0.4em] text-white/25">
+                PERSONAL ARCHIVE
+              </span>
+            </div>
+
           </div>
-          
-          <h1 className="font-display text-6xl md:text-8xl lg:text-9xl tracking-[0.2em] text-white drop-shadow-[0_0_30px_rgba(74,140,255,0.4)] mb-6">
-            {t.title}
-          </h1>
-          
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 mt-4">
-            <span className="font-display text-sm md:text-base tracking-[0.4em] text-blood/90 uppercase drop-shadow-md">{t.subtitle1}</span>
-            <span className="hidden md:block w-1 h-1 rounded-full bg-silver/50" />
-            <span className="font-display text-sm md:text-base tracking-[0.4em] text-siren uppercase drop-shadow-md">{t.subtitle2}</span>
-          </div>
-          <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-silver/50 to-transparent mx-auto mt-12 mb-6" />
-          <p className="text-silver/70 text-[10px] md:text-xs tracking-[0.4em] uppercase">{t.tagline}</p>
         </section>
 
-        {/* CONTENT SECTIONS */}
-        <div className="max-w-4xl mx-auto px-6 space-y-24 pb-32">
-          
-          <section className="text-center space-y-6">
-            <h2 className="font-display text-3xl md:text-4xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.introTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.introP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.introP2}</p>
-            <p className="text-silver/80 leading-relaxed">{t.introP3}</p>
-            <p className="text-silver/80 leading-relaxed">{t.introP4}</p>
-          </section>
+        {/* =======================================================
+            ARCHIVE
+            ======================================================= */}
 
-          <section className="space-y-6 border-l-2 border-sovereign/40 pl-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.journeyTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.journeyP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.journeyP2}</p>
-            <p className="text-silver/80 leading-relaxed">{t.journeyP3}</p>
-            <p className="text-silver/80 leading-relaxed">{t.journeyP4}</p>
-          </section>
+        <section className="mx-auto w-full max-w-7xl px-6 pb-32 md:px-10 lg:px-16">
 
-          <section className="space-y-6 border-l-2 border-blood/50 pl-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.shadowTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.shadowP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.shadowP2}</p>
-            <p className="text-silver/80 leading-relaxed">{t.shadowP3}</p>
-            <p className="text-silver/80 leading-relaxed">{t.shadowP4}</p>
-          </section>
+          <div className="mb-8 flex items-center justify-between border-b border-white/10 pb-5">
+            <span className="text-[8px] tracking-[0.4em] text-white/30">
+              {isRTL ? 'الفهرس الشخصي' : 'PERSONAL INDEX'}
+            </span>
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.alchemyTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.alchemyP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.alchemyP2}</p>
-          </section>
+            <span className="text-[8px] tracking-[0.3em] text-white/20">
+              {t.cards.length.toString().padStart(2, '0')} FILES
+            </span>
+          </div>
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.academicTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.academicP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.academicP2}</p>
-            <p className="text-silver/80 leading-relaxed">{t.academicP3}</p>
-            <p className="text-silver/80 leading-relaxed">{t.academicP4}</p>
-          </section>
+          <div className="border-t border-white/10">
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.nowTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.nowP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.nowP2}</p>
-          </section>
+            {t.cards.map((card) => (
+              <button
+                key={card.id}
+                onClick={() => setActiveCard(card.id)}
+                className={`group relative flex w-full items-center border-b border-white/10 py-8 transition-all duration-500 hover:bg-white/[0.035] ${
+                  isRTL ? 'text-right' : 'text-left'
+                }`}
+              >
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.interestsTitle}</h2>
-            <p className="text-silver/80 leading-relaxed text-center max-w-2xl mx-auto">{t.interestsP1}</p>
-            <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto mt-6">
-              {['Shadow Work','Psychology','Forensic Psychology','Human Behaviour','Neuroscience','Philosophy','Astrology','Mythology','Astronomy','Spirituality','Tarot','Meditation','Dreams','Ancient Symbols','Cultures & Languages','Technology & AI','Art & Music','Storytelling','Body Language','Horror & True Crime','Gothic Aesthetics','Dark Academia','Cosmic Aesthetics','Moon Phases','Space','Fitness','Self-Development','Animals','Parallel-Universe Theories'].map((interest) => (
-                <span key={interest} className="px-3 py-1.5 text-[10px] tracking-[0.15em] uppercase text-silver/80 border border-silver/20 rounded-full hover:border-sovereign/60 hover:text-white hover:bg-obsidian/60 transition-all duration-300">
-                  {interest}
+                <span className="w-16 shrink-0 text-[9px] tracking-[0.25em] text-white/20 transition-colors group-hover:text-red-700">
+                  {card.number}
                 </span>
-              ))}
-            </div>
-          </section>
 
-          <section className="space-y-6 border border-silver/20 rounded-lg p-8 bg-obsidian/50 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blood/15 blur-[50px] rounded-full pointer-events-none" />
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.aestheticTitle}</h2>
-            <p className="text-silver/80 leading-relaxed text-center">{t.aestheticP1}</p>
-            <p className="text-silver/80 leading-relaxed text-center">{t.aestheticP2}</p>
-            <p className="text-silver/80 leading-relaxed text-center">{t.aestheticP3}</p>
-          </section>
+                <div className="flex-1">
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.animalsTitle}</h2>
-            <p className="text-silver/80 leading-relaxed text-center max-w-2xl mx-auto">{t.animalsP1}</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-              {[
-                { emoji: '🐍', name: 'The Snake', title: 'Transformation', desc: 'The snake represents transformation, rebirth and hidden wisdom.' },
-                { emoji: '🦉', name: 'The Owl', title: 'Insight', desc: 'The owl represents intuition, observation and seeing what others overlook.' },
-                { emoji: '🐦‍⬛', name: 'The Raven', title: 'Shadow', desc: 'The raven represents mystery, the unconscious and transformation through darkness.' },
-                { emoji: '🐆', name: 'The Black Jaguar', title: 'Protection', desc: 'The black jaguar represents strength, courage, protection and mastery of the shadow.' },
-                { emoji: '🦅', name: 'The Eagle', title: 'Higher Perspective', desc: 'The eagle represents freedom, independence, vision and the ability to see the larger picture.' },
-              ].map((animal, i) => (
-                <div key={i} className="border border-silver/20 rounded-lg p-6 bg-obsidian/50 backdrop-blur-sm hover:border-sovereign/60 transition-all duration-500 group">
-                  <div className="text-3xl mb-3">{animal.emoji}</div>
-                  <p className="text-sovereign/80 text-[10px] tracking-[0.3em] uppercase mb-1 group-hover:text-sovereign transition-colors">{animal.title}</p>
-                  <h4 className="font-display text-xl text-white mb-2">{animal.name}</h4>
-                  <p className="text-silver/70 text-sm leading-relaxed">{animal.desc}</p>
+                  <span className="block text-[clamp(1.15rem,2.4vw,2rem)] font-light tracking-[0.07em] text-white/80 transition-all duration-300 group-hover:tracking-[0.11em] group-hover:text-white">
+                    {card.title}
+                  </span>
+
+                  <span className="mt-2 block text-[8px] tracking-[0.35em] text-white/25">
+                    {card.category}
+                  </span>
+
                 </div>
-              ))}
-            </div>
-          </section>
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.cosmicTitle}</h2>
-            <p className="text-silver/80 leading-relaxed text-center">{t.cosmicP1}</p>
-            <div className="border border-silver/20 rounded-lg overflow-hidden bg-obsidian/50 backdrop-blur-sm max-w-md mx-auto mt-6">
-              {[
-                { sign: 'Rising', value: 'Leo' }, { sign: 'Sun', value: 'Taurus' }, { sign: 'Moon', value: 'Virgo' },
-                { sign: 'Venus', value: 'Gemini' }, { sign: 'Mercury', value: 'Aries' }, { sign: 'Mars', value: 'Scorpio' },
-                { sign: 'Lilith', value: 'Scorpio' }, { sign: 'Personality', value: 'INTJ-T' }
-              ].map((item, i, arr) => (
-                <div key={item.sign} className={`flex items-center justify-between px-6 py-4 ${i !== arr.length - 1 ? 'border-b border-silver/10' : ''}`}>
-                  <span className="text-silver/60 text-[10px] tracking-[0.3em] uppercase">{item.sign}</span>
-                  <span className="font-display text-lg text-sovereign drop-shadow-sm">{item.value}</span>
+                <span className="px-4 text-lg font-light text-white/20 transition-all duration-300 group-hover:text-red-700">
+                  {isRTL ? '←' : '→'}
+                </span>
+
+                <span
+                  className={`absolute bottom-0 h-px w-0 bg-red-800 transition-all duration-500 group-hover:w-28 ${
+                    isRTL ? 'right-0' : 'left-0'
+                  }`}
+                />
+
+              </button>
+            ))}
+
+          </div>
+        </section>
+
+        {/* FOOTER */}
+
+        <footer className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-5 border-t border-white/10 px-6 py-10 md:flex-row md:px-10 lg:px-16">
+
+          <span className="text-[8px] tracking-[0.45em] text-white/20">
+            LILITH'S ECLIPSE
+          </span>
+
+          <span className="text-center text-[8px] tracking-[0.3em] text-white/20">
+            {t.footerText}
+          </span>
+
+        </footer>
+
+      </main>
+
+      {/* =========================================================
+          MODAL
+          ========================================================= */}
+
+      {activeCardData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
+
+          <button
+            aria-label="Close"
+            onClick={() => setActiveCard(null)}
+            className="absolute inset-0 cursor-default bg-black/85 backdrop-blur-md"
+          />
+
+          <div
+            className={`relative flex max-h-[91vh] w-full max-w-5xl flex-col overflow-hidden border border-white/15 bg-black/95 shadow-2xl ${
+              isRTL ? 'text-right' : 'text-left'
+            }`}
+          >
+
+            {/* MODAL HEADER */}
+
+            <div className="flex shrink-0 items-start justify-between border-b border-white/10 px-6 py-6 md:px-10">
+
+              <div className="flex items-start gap-5">
+
+                <span className="pt-1 text-[9px] tracking-[0.3em] text-red-700">
+                  {activeCardData.number}
+                </span>
+
+                <div>
+
+                  <span className="mb-2 block text-[8px] tracking-[0.4em] text-white/25">
+                    {activeCardData.category}
+                  </span>
+
+                  <h2 className="text-xl font-light tracking-[0.08em] text-white md:text-3xl">
+                    {activeCardData.title}
+                  </h2>
+
                 </div>
-              ))}
+
+              </div>
+
+              <button
+                onClick={() => setActiveCard(null)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/15 text-xl font-light text-white/40 transition-colors hover:border-white/50 hover:text-white"
+              >
+                ×
+              </button>
+
             </div>
-          </section>
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.languagesTitle}</h2>
-            <p className="text-silver/80 leading-relaxed text-center">{t.languagesP1}</p>
-            <p className="text-silver/80 leading-relaxed text-center">{t.languagesP2}</p>
-          </section>
+            {/* MODAL BODY */}
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 text-center drop-shadow-md">{t.charactersTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.charactersP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.charactersP2}</p>
-          </section>
+            <div className="overflow-y-auto px-6 py-10 md:px-10 md:py-14">
 
-          <section className="space-y-6 border border-silver/20 rounded-lg p-8 bg-obsidian/50 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-siren/15 blur-[60px] rounded-full pointer-events-none" />
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.personalTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.personalP1}</p>
-            <p className="text-silver/80 leading-relaxed font-medium text-white">{t.personalP2}</p>
-          </section>
+              {/* REGULAR TEXT */}
 
-          <section className="space-y-6">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[0.1em] text-white mb-6 drop-shadow-md">{t.buildTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.buildP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.buildP2}</p>
-          </section>
+              {activeCardData.content.length > 0 && (
+                <div className="max-w-4xl space-y-7">
 
-          <section className="space-y-6 text-center border-t border-silver/20 pt-16">
-            <h2 className="font-display text-3xl md:text-4xl tracking-[0.1em] text-white mb-8 drop-shadow-md">{t.whyTitle}</h2>
-            <p className="text-silver/80 leading-relaxed">{t.whyP1}</p>
-            <p className="text-silver/80 leading-relaxed">{t.whyP2}</p>
-            <p className="text-silver/80 leading-relaxed">{t.whyP3}</p>
-            <p className="text-silver/80 leading-relaxed">{t.whyP4}</p>
-            <p className="font-display text-xl text-white italic mt-8 drop-shadow-md">{t.whyFinal}</p>
-            <p className="text-silver/70 leading-relaxed italic">{t.whyFinalP}</p>
-          </section>
+                  {activeCardData.content.map((paragraph, index) => (
+                    <p
+                      key={index}
+                      className={`text-sm font-light leading-8 text-white/60 md:text-base md:leading-9 ${
+                        index === 0
+                          ? 'border-red-900 pl-5 text-white/85 ' +
+                            (isRTL
+                              ? 'border-r pr-5 pl-0'
+                              : 'border-l')
+                          : ''
+                      }`}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
 
+                </div>
+              )}
+
+              {/* TAGS */}
+
+              {activeCardData.type === 'tags' &&
+                activeCardData.tags && (
+                  <div className="mt-12 grid grid-cols-2 border-t border-white/10 sm:grid-cols-3 md:grid-cols-4">
+
+                    {activeCardData.tags.map((tag) => (
+                      <div
+                        key={tag}
+                        className="border-b border-r border-white/10 px-4 py-5 text-center text-[8px] tracking-[0.25em] text-white/45 transition-colors hover:text-white"
+                      >
+                        {tag}
+                      </div>
+                    ))}
+
+                  </div>
+                )}
+
+              {/* SPIRITUAL ANIMALS */}
+
+              {activeCardData.type === 'animals' &&
+                activeCardData.animals && (
+                  <div className="mt-12 grid gap-px border border-white/10 bg-white/10 md:grid-cols-2">
+
+                    {activeCardData.animals.map((animal) => (
+                      <div
+                        key={animal.name}
+                        className="bg-black p-7 md:p-9"
+                      >
+
+                        <span className="text-[8px] tracking-[0.35em] text-red-800">
+                          {animal.label}
+                        </span>
+
+                        <h3 className="mt-5 text-xl font-light tracking-[0.15em] text-white">
+                          {animal.name}
+                        </h3>
+
+                        <p className="mt-3 text-[9px] tracking-[0.25em] text-white/35">
+                          {animal.title}
+                        </p>
+
+                        <p className="mt-6 text-xs leading-7 text-white/45">
+                          {animal.description}
+                        </p>
+
+                      </div>
+                    ))}
+
+                  </div>
+                )}
+
+              {/* ZODIAC */}
+
+              {activeCardData.type === 'zodiac' &&
+                activeCardData.zodiac && (
+                  <div className="mt-12 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 md:grid-cols-3">
+
+                    {activeCardData.zodiac.map((item) => (
+                      <div
+                        key={`${item.placement}-${item.sign}`}
+                        className="bg-black p-7 md:p-8"
+                      >
+
+                        <span className="text-[8px] tracking-[0.35em] text-red-800">
+                          {item.placement}
+                        </span>
+
+                        <h3 className="mt-5 text-2xl font-light tracking-[0.1em] text-white">
+                          {item.sign}
+                        </h3>
+
+                      </div>
+                    ))}
+
+                  </div>
+                )}
+
+              {/* MBTI */}
+
+              {activeCardData.type === 'mbti' &&
+                activeCardData.mbti && (
+                  <div className="mt-12 border border-white/10 p-8 md:p-12">
+
+                    <span className="text-[8px] tracking-[0.45em] text-red-800">
+                      PERSONALITY TYPE
+                    </span>
+
+                    <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+
+                      <div>
+
+                        <div className="text-[clamp(4rem,11vw,8rem)] font-light leading-none tracking-[-0.08em] text-white">
+                          {activeCardData.mbti.type}
+                        </div>
+
+                        <div className="mt-4 text-[9px] tracking-[0.5em] text-white/30">
+                          {activeCardData.mbti.title}
+                        </div>
+
+                      </div>
+
+                      <p className="max-w-md text-xs leading-7 text-white/45">
+                        {activeCardData.mbti.description}
+                      </p>
+
+                    </div>
+
+                  </div>
+                )}
+
+              {/* LANGUAGES */}
+
+              {activeCardData.type === 'languages' &&
+                activeCardData.languages && (
+                  <div className="mt-12 grid gap-10 md:grid-cols-2">
+
+                    <div>
+                      <span className="text-[8px] tracking-[0.4em] text-red-800">
+                        CURRENTLY SPEAK
+                      </span>
+
+                      <div className="mt-6 border-t border-white/10">
+
+                        {activeCardData.languages.current.map((item) => (
+                          <div
+                            key={item.language}
+                            className="flex items-center justify-between border-b border-white/10 py-5"
+                          >
+                            <span className="text-sm tracking-[0.2em] text-white/75">
+                              {item.language}
+                            </span>
+
+                            <span className="text-[8px] tracking-[0.3em] text-white/25">
+                              {item.level}
+                            </span>
+                          </div>
+                        ))}
+
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[8px] tracking-[0.4em] text-red-800">
+                        CURRENTLY LEARNING
+                      </span>
+
+                      <div className="mt-6 border-t border-white/10">
+
+                        {activeCardData.languages.learning.map((item) => (
+                          <div
+                            key={item.language}
+                            className="border-b border-white/10 py-5 text-sm tracking-[0.2em] text-white/75"
+                          >
+                            {item.language}
+                          </div>
+                        ))}
+
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+              {/* CHARACTERS */}
+
+              {activeCardData.type === 'characters' &&
+                activeCardData.characters && (
+                  <div className="mt-12 grid gap-px border border-white/10 bg-white/10 md:grid-cols-2">
+
+                    {activeCardData.characters.map((character) => (
+                      <div
+                        key={character.name}
+                        className="bg-black p-8 md:p-10"
+                      >
+
+                        <h3 className="text-lg tracking-[0.2em] text-white">
+                          {character.name}
+                        </h3>
+
+                        <p className="mt-5 text-xs leading-7 text-white/45">
+                          {character.description}
+                        </p>
+
+                      </div>
+                    ))}
+
+                  </div>
+                )}
+
+              {/* CELEBRITY */}
+
+              {activeCardData.type === 'celebrity' &&
+                activeCardData.celebrity && (
+                  <div className="mt-12 border border-white/10 p-8 md:p-14">
+
+                    <span className="text-[8px] tracking-[0.4em] text-red-800">
+                      CELEBRITY CRUSH
+                    </span>
+
+                    <h3 className="mt-7 text-[clamp(3rem,9vw,7rem)] font-light leading-none tracking-[-0.05em] text-white">
+                      {activeCardData.celebrity.name}
+                    </h3>
+
+                    <p className="mt-8 max-w-2xl text-sm leading-8 text-white/50">
+                      {activeCardData.celebrity.description}
+                    </p>
+
+                  </div>
+                )}
+
+              {/* PERSONAL */}
+
+              {activeCardData.type === 'personal' &&
+                activeCardData.personal && (
+                  <div className="mt-12 border-t border-white/10">
+
+                    {activeCardData.personal.map((item) => (
+                      <div
+                        key={item.label}
+                        className="grid gap-5 border-b border-white/10 py-8 md:grid-cols-[190px_220px_1fr] md:items-start"
+                      >
+
+                        <span className="text-[8px] tracking-[0.3em] text-white/30">
+                          {item.label}
+                        </span>
+
+                        <h3 className="text-sm tracking-[0.18em] text-white">
+                          {item.value}
+                        </h3>
+
+                        <p className="text-xs leading-7 text-white/45">
+                          {item.description}
+                        </p>
+
+                      </div>
+                    ))}
+
+                  </div>
+                )}
+
+            </div>
+
+            {/* MODAL FOOTER */}
+
+            <div className="flex shrink-0 items-center justify-between border-t border-white/10 px-6 py-4 md:px-10">
+
+              <span className="text-[7px] tracking-[0.4em] text-white/20">
+                LILITH'S PERSONAL ARCHIVE
+              </span>
+
+              <button
+                onClick={() => setActiveCard(null)}
+                className="text-[8px] tracking-[0.35em] text-white/35 transition-colors hover:text-white"
+              >
+                {isRTL ? 'إغلاق الملف' : 'CLOSE FILE'}
+              </button>
+
+            </div>
+
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
