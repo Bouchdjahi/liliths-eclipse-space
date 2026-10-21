@@ -14,7 +14,8 @@ interface Moon {
 const MOONS: Moon[] = [
   { href: "/space/music",                 labelEn: "MUSIC",              labelAr: "الموسيقى" },
   { href: "/space/contact",               labelEn: "CONTACT",            labelAr: "اتصال" },
-  { href: "/space/websites",              labelEn: "LILITH'S WEBSITES",  labelAr: "مواقع ليليث" },
+  { href: "/space/services",              labelEn: "LILITH'S SERVICES",  labelAr: "خدمات ليليث" },
+  { href: "/space/gifts",                 labelEn: "GIFTS",              labelAr: "الهدايا" },
   { href: "/library",                     labelEn: "LIBRARY",            labelAr: "المكتبة" },
   { href: "/space/astrology",             labelEn: "ASTROLOGY",          labelAr: "التنجيم" },
   { href: "/space/numerology",            labelEn: "NUMEROLOGY",         labelAr: "علم الأعداد" },
