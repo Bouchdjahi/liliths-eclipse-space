@@ -8,55 +8,55 @@ import Link from 'next/link'
 const CONTENT = {
   en: {
     back: '← BACK TO ECLIPSE',
-    title: "LILITH'S WEBSITES",
-    subtitle: 'A collection of spaces I have created.',
-    intro: 'Each website holds a different purpose — a different room of the same world.',
+    title: "WELCOME TO MY SERVICES",
+    subtitle: 'A space for the work we do together.',
+    intro: 'Each space holds a different purpose — one is a gift, the other is my work.',
     visit: 'Enter →',
     websites: [
       {
         id: 'release-sanctuary',
-        title: 'THE RELEASE SANCTUARY',
+        title: 'THE RELEASE SANCTUARY (MY GIFT TO YOU)',
         subtitle: 'Write it. Feel it. Release it. Return to yourself.',
-        description: 'A private space for the things you cannot always say out loud. This is your space. You don\'t have to explain everything here. You don\'t have to be okay here. You don\'t have to hold everything together.',
+        description: 'This is my gift to all of you — a completely free, safe space created with love. Inside, you will find a private room where you can write absolutely anything and then burn your letter to release it. You can talk to an AI therapist, explore guided journaling, and listen to my hypnosis recordings. Nothing here costs a thing. It is simply a sanctuary where you don\'t have to explain everything, don\'t have to be okay, and don\'t have to hold everything together alone.',
         url: 'https://lilithseclipse-sanctuary.vercel.app/',
-        tags: ['Sanctuary', 'Reflection', 'Release', 'Private Space'],
+        tags: ['Free Gift', 'Safe Space', 'AI Therapist', 'Burn Letters', 'Hypnosis'],
       },
       {
         id: 'services',
         title: "LILITH'S ECLIPSE SERVICES",
         subtitle: 'Sessions • Personal Consultations • Customised Recordings.',
-        description: 'I offer plenty of free content, but private services are different. Sessions, personal consultations, and customised recordings require my time, focus, effort, and direct involvement — and that cannot be offered for free. I am a person, not a robot or a machine. My time, energy, and effort have limits and value.',
+        description: 'This is where you can work with me directly. I offer one-on-one sessions, personal consultations, and custom hypnosis recordings tailored to your specific needs. Unlike the free sanctuary, these services require my personal time, focus, effort, and direct involvement — and therefore they are paid. I am a person, not a machine. My time and energy have value, and these sessions are designed for those ready to invest in their own inner work with me.',
         url: 'https://lilithseclipse-services.pages.dev/',
-        tags: ['Services', 'Sessions', 'Consultations', 'Custom Work'],
+        tags: ['Paid Services', '1-on-1 Sessions', 'Consultations', 'Custom Hypnosis'],
       },
     ],
-    footer: 'More spaces will be added in time.',
+    footer: 'Everything has its time and its place.',
   },
   ar: {
     back: '← العودة إلى الكسوف',
-    title: 'مواقع ليليث',
-    subtitle: 'مجموعة من المساحات التي أنشأتها.',
-    intro: 'كل موقع يحمل غرضًا مختلفًا — غرفة مختلفة من العالم نفسه.',
+    title: 'مرحباً بكم في خدماتي',
+    subtitle: 'مساحة للعمل الذي نقوم به معاً.',
+    intro: 'كل مساحة لها غرض مختلف — إحداهما هدية، والأخرى هي عملي.',
     visit: 'ادخل ←',
     websites: [
       {
         id: 'release-sanctuary',
-        title: 'ملاذ التحرر',
+        title: 'ملاذ التحرر (هديتي إليكم)',
         subtitle: 'اكتبيها. اشعري بها. أطلقيها. عودي إلى نفسك.',
-        description: 'مساحة خاصة للأشياء التي لا تستطيعين قولها بصوت عالٍ دائمًا. هذه مساحتك. لا يجب أن تشرحي كل شيء هنا. لا يجب أن تكوني بخير هنا. لا يجب أن تحملي كل شيء وحدك.',
+        description: 'هذه هديتي لكم جميعاً — مساحة آمنة ومجانية تماماً، صنعتها بحب. ستجدين في الداخل غرفة خاصة يمكنك فيها كتابة أي شيء ثم حرق رسالتك للتخلص منها. يمكنك التحدث مع معالج نفسي بالذكاء الاصطناعي، واستكشاف التدوين الموجه، والاستماع إلى تسجيلات التنويم الإيحائي الخاصة بي. لا شيء هنا يكلف شيئاً. إنه ببساطة ملاذ حيث لا تحتاجين إلى شرح كل شيء، ولا تحتاجين إلى أن تكوني بخير، ولا تحتاجين إلى حمل كل شيء وحدك.',
         url: 'https://lilithseclipse-sanctuary.vercel.app/',
-        tags: ['ملاذ', 'تأمل', 'تحرر', 'مساحة خاصة'],
+        tags: ['هدية مجانية', 'مساحة آمنة', 'معالج AI', 'حرق الرسائل', 'تنويم إيحائي'],
       },
       {
         id: 'services',
         title: 'خدمات ليليث إكليبس',
         subtitle: 'جلسات • تشخيص شخصي • تسجيلات مخصصة.',
-        description: 'أقدم الكثير من المحتوى المجاني، لكن الخدمات الخاصة مختلفة. الجلسات، التشخيص، والتسجيلات المخصصة تتطلب مني وقتًا وتركيزًا ومجهودًا وتفاعلًا مباشرًا — وهذا شيء لا يمكنني تقديمه مجانًا. أنا إنسانة، ولست روبوتًا. وقتي وطاقتي ومجهودي لهم حدود وقيمة.',
+        description: 'هنا يمكنك العمل معي مباشرة. أقدم جلسات فردية، واستشارات شخصية، وتسجيلات تنويم إيحائي مخصصة تُصمم خصيصاً لاحتياجاتك. على عكس الملاذ المجاني، تتطلب هذه الخدمات وقتي الشخصي وتركيزي ومجهودي ومشاركتي المباشرة — وبالتالي فهي مدفوعة. أنا إنسانة، ولست آلة. وقتي وطاقتي لهما قيمة، وهذه الجلسات مصممة لمن هن مستعدات للاستثمار في عمقهن الداخلي معي.',
         url: 'https://lilithseclipse-services.pages.dev/',
-        tags: ['خدمات', 'جلسات', 'تشخيص', 'عمل مخصص'],
+        tags: ['خدمات مدفوعة', 'جلسات فردية', 'استشارات', 'تنويم مخصص'],
       },
     ],
-    footer: 'سيتم إضافة المزيد من المساحات مع الوقت.',
+    footer: 'كل شيء له وقته ومكانه.',
   },
 }
 
@@ -118,7 +118,7 @@ function StarrySkyBackground() {
   )
 }
 
-export default function WebsitesPage() {
+export default function ServicesPage() {
   const [lang, setLang] = useState<'en' | 'ar'>('en')
   const t = CONTENT[lang]
   const isRTL = lang === 'ar'
