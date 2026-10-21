@@ -2,27 +2,22 @@
 
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
 
 const OMDB_API_KEY = process.env.NEXT_PUBLIC_OMDB_API_KEY || 'YOUR_OMDB_API_KEY_HERE'
 
 // --- POSTER SOURCE BUILDERS ---
 
-// Cinemeta (Stremio) — most reliable free source, returns exact poster for IMDb ID.
 const CINEMETA = (type: string, imdbId: string) => {
   const isSeries = /series|anime|cartoon|documentary|docu|tv|live action/i.test(type)
   return `https://v3-cinemeta.strem.io/meta/${isSeries ? 'series' : 'movie'}/${imdbId}.json`
 }
 
-// Metahub — direct image CDN (no API key). May 404 for obscure titles.
 const METAHUB = (imdbId: string, size: 'small' | 'medium' | 'large' = 'medium') =>
   `https://images.metahub.space/poster/${size}/${imdbId}.jpg`
 
-// IMDb suggestion — returns real poster URL by title/year.
 const IMDB_SUGGEST = (query: string) =>
   `https://v3.sg.media-imdb.com/suggestion/x/${encodeURIComponent(query)}.json`
-
-// TMDB public image proxy (poster path from search API — needs key), skip.
-// Fallback: use a generic dark placeholder served as SVG data URI (handled in component).
 
 // --- COMPLETE IMDb ID MAP ---
 const IMDB_IDS: Record<string, string> = {
@@ -362,16 +357,15 @@ const SvgGlobe = ({ color }: { color: string }) => (
   </svg>
 )
 
-// --- GLOBAL POSTER CACHE (shared across instances so the same title only resolves once) ---
+// --- GLOBAL POSTER CACHE ---
 const posterCache: Record<string, string> = {}
 
-// --- POSTER COMPONENT (rewritten: img onLoad/onError drives the fallback chain) ---
+// --- POSTER COMPONENT ---
 function Poster({ imdbId: imdbIdProp, title, year, type, accent }: {
   imdbId?: string, title: string, year?: number, type?: string, accent: string
 }) {
   const initialId = imdbIdProp || IMDB_IDS[title]
 
-  // Candidate list is computed once per mount.
   const [candidates, setCandidates] = useState<string[]>(() => {
     if (initialId && posterCache[initialId]) return [posterCache[initialId]]
     const list: string[] = []
@@ -387,7 +381,6 @@ function Poster({ imdbId: imdbIdProp, title, year, type, accent }: {
   const [loading, setLoading] = useState(!poster)
   const resolvedRef = useRef(false)
 
-  // Fetch Cinemeta / suggestion / OMDb to append more candidates if the direct ones fail.
   useEffect(() => {
     if (resolvedRef.current || poster) return
 
@@ -397,7 +390,6 @@ function Poster({ imdbId: imdbIdProp, title, year, type, accent }: {
     const appendExtras = async () => {
       const extras: string[] = []
 
-      // Cinemeta
       if (initialId) {
         try {
           const res = await fetch(CINEMETA(type || 'Movie', initialId), { signal: controller.signal })
@@ -409,7 +401,6 @@ function Poster({ imdbId: imdbIdProp, title, year, type, accent }: {
         } catch { /* continue */ }
       }
 
-      // IMDb suggestion (title + year → image URL)
       try {
         const q = `${title}${year ? ` ${year}` : ''}`
         const res = await fetch(IMDB_SUGGEST(q), { signal: controller.signal })
@@ -421,7 +412,6 @@ function Poster({ imdbId: imdbIdProp, title, year, type, accent }: {
         if (loose?.i?.imageUrl) extras.push(loose.i.imageUrl)
       } catch { /* continue */ }
 
-      // OMDb (if key present)
       if (OMDB_API_KEY !== 'YOUR_OMDB_API_KEY_HERE') {
         try {
           const q = initialId ? `i=${initialId}` : `t=${encodeURIComponent(title)}${year ? `&y=${year}` : ''}`
@@ -440,7 +430,6 @@ function Poster({ imdbId: imdbIdProp, title, year, type, accent }: {
     return () => { cancelled = true; controller.abort() }
   }, [initialId, title, year, type, poster])
 
-  // When the index moves past the last candidate, give up → placeholder.
   useEffect(() => {
     if (index >= candidates.length) {
       setLoading(false)
@@ -458,10 +447,8 @@ function Poster({ imdbId: imdbIdProp, title, year, type, accent }: {
   }
 
   const handleError = () => {
-    // Try next candidate.
     if (index + 1 < candidates.length) setIndex(i => i + 1)
     else {
-      // Wait a tick in case extras are still being appended.
       setTimeout(() => {
         setIndex(i => (i + 1 < candidates.length ? i + 1 : i))
         setLoading(false)
@@ -538,7 +525,8 @@ For me, the classification depends on the whole journey of the relationship, not
 
 With that said, let's enter the stories. 🖤`,
     spiritualTags:'KARMIC · TWIN FLAME · SHADOW · SOULMATE',
-    framework:'FULL FRAMEWORK: MY TIKTOK PLAYLIST'
+    framework:'FULL FRAMEWORK: MY TIKTOK PLAYLIST',
+    backToSpace: '← RETURN TO SPACE'
   },
   ar: {
     archive:'الأرشيف', favorites:'المفضلة', archiveSector:'قسم الأرشيف', noTitles:'لا توجد عناوين بعد',
@@ -580,7 +568,8 @@ With that said, let's enter the stories. 🖤`,
 
 وبعد هذا التوضيح، فلندخل إلى القصص. 🖤`,
     spiritualTags:'كارمي · توأم الشعلة · الظل · رفيق الروح',
-    framework:'الإطار الكامل: قائمة TikTok الخاصة بي'
+    framework:'الإطار الكامل: قائمة TikTok الخاصة بي',
+    backToSpace: '← العودة إلى الفضاء'
   }
 } as const
 
@@ -683,6 +672,15 @@ export default function TVCornerPage() {
       {/* NAVIGATION */}
       <nav className="fixed top-0 left-0 right-0 z-40 bg-[#030407]/85 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-[1500px] mx-auto px-4 md:px-6 h-16 flex items-center gap-3">
+          
+          {/* Back to space button */}
+          <Link
+            href="/space"
+            className="text-[10px] tracking-[0.25em] uppercase text-white/70 hover:text-white transition-colors whitespace-nowrap flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50"
+          >
+            {t.backToSpace}
+          </Link>
+
           <motion.button
             onClick={() => setActiveCategory(null)}
             className="font-display text-[11px] tracking-[0.3em] text-white/90 whitespace-nowrap flex-shrink-0"
