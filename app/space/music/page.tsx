@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
+
 /* ============================================================
    ELEGANT SVG ICONS
    ============================================================ */
@@ -209,6 +210,32 @@ const musicVideos = [
     descriptionEn: 'Back before I finally faced myself, I used to see myself as a monster — someone people should be afraid of. My younger self was terrified, and this song captures the exact rage and mental struggles I was going through, as well as the distorted way I saw myself back then.',
     descriptionAr: 'في الفترة التي سبقت مواجهتي لنفسي، كنت أرى ذاتي كوحش — كشخص ينبغي للآخرين الخوف منه. كانت نفسي الصغيرة مرعوبة، وتجسد هذه الأغنية بدقة حالة الغضب والصراعات النفسية التي كنت أعاني منها، إضافة إلى الطريقة المشوهة التي كنت أرى بها نفسي في ذلك الوقت.',
   },
+  {
+    id: 'video10',
+    titleEn: 'Spiritual Ego',
+    titleAr: 'الغرور الروحي',
+    artist: 'Unknown',
+    vibeEn: 'Twin Flame Awakening',
+    vibeAr: 'صحوة توأم الشعلة',
+    color: '#8b5cf6',
+    thumbnail: 'https://img.youtube.com/vi/EgKdyHcZJcs/maxresdefault.jpg',
+    url: 'https://youtu.be/EgKdyHcZJcs?si=89BfVL_n6IRa5fWI',
+    descriptionEn: 'This song takes me back to when I first discovered my twin flame journey, back when my spiritual ego made me believe that he and I were the chosen ones.',
+    descriptionAr: 'هذه الأغنية تعيدني إلى بدايات رحلتي مع التوأم الشعلي، حين اكتشفت هذا المفهوم لأول مرة، وحين كان غروري الروحي يجعلني أعتقد أنني وهو من المختارين.',
+  },
+  {
+    id: 'video11',
+    titleEn: 'Twin Flame Discovery',
+    titleAr: 'اكتشاف التوأم الشعلة',
+    artist: 'Unknown',
+    vibeEn: 'Twin Flame Journey',
+    vibeAr: 'رحلة توأم الشعلة',
+    color: '#ec4899',
+    thumbnail: 'https://img.youtube.com/vi/CzG5E2NiZO8/maxresdefault.jpg',
+    url: 'https://youtu.be/CzG5E2NiZO8?si=d2gvaxjQeKZZ4s_B',
+    descriptionEn: 'This song is exactly how it felt when I was first discovering my twin flame journey.',
+    descriptionAr: 'هذه الأغنية تصف تمامًا ما كنت أشعر به عندما بدأت أكتشف رحلتي مع التوأم الشعلي.',
+  },
 ]
 
 /* ============================================================
@@ -220,7 +247,6 @@ export default function MusicPage() {
   const [activeTab, setActiveTab] = useState<'spotify' | 'videos' | 'songs'>('spotify')
   const [selectedVideo, setSelectedVideo] = useState<any>(null)
 
-  // Skull-dominant mix
   const floatingSymbols = [
     SkullIcon, SkullIcon, SkullIcon, SkullIcon,
     SkullIcon, SkullIcon, SkullIcon, SkullIcon,
@@ -232,14 +258,12 @@ export default function MusicPage() {
   return (
     <div className="min-h-screen bg-[#04020d] text-[#e2e8f0] overflow-hidden relative selection:bg-fuchsia-500/30">
 
-      {/* ============ COSMIC BACKGROUND ============ */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#04020d] via-[#080314] to-[#010105]" />
       <div className="absolute top-[15%] left-[-10%] w-[45vw] h-[45vw] rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)' }} />
       <div className="absolute bottom-[10%] right-[-10%] w-[50vw] h-[50vw] rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.06) 0%, transparent 70%)' }} />
 
-      {/* Starfield */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         {[...Array(120)].map((_, i) => (
           <div key={i} className="absolute rounded-full bg-white" style={{
@@ -254,21 +278,18 @@ export default function MusicPage() {
         ))}
       </div>
 
-      {/* CRT Scanline overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.04] z-40"
         style={{
           backgroundImage: 'linear-gradient(rgba(236,72,153,0.6) 50%, transparent 50%)',
           backgroundSize: '100% 4px',
         }} />
 
-      {/* Pixel grid */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
         style={{
           backgroundImage: 'radial-gradient(rgba(236,72,153,0.8) 1px, transparent 1px)',
           backgroundSize: '20px 20px',
         }} />
 
-      {/* ============ SKULL-HEAVY FLOATING BACKGROUND ============ */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(30)].map((_, i) => {
           const Symbol = floatingSymbols[i % floatingSymbols.length]
@@ -290,7 +311,6 @@ export default function MusicPage() {
         })}
       </div>
 
-      {/* ============ NAV ============ */}
       <div className="relative z-20 max-w-7xl mx-auto px-6 pt-6 flex justify-between items-center">
         <motion.button
           initial={{ opacity: 0, x: -10 }}
@@ -308,7 +328,6 @@ export default function MusicPage() {
         </button>
       </div>
 
-      {/* ============ HERO ============ */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -339,7 +358,6 @@ export default function MusicPage() {
         </p>
       </motion.div>
 
-      {/* ============ TABS ============ */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-6">
         <div className="flex flex-wrap justify-center gap-3 md:gap-5 mb-10 border-b border-pink-400/10 pb-6 text-xs md:text-sm tracking-widest font-mono">
           {([
@@ -366,7 +384,6 @@ export default function MusicPage() {
           })}
         </div>
 
-        {/* ============ SPOTIFY ============ */}
         {activeTab === 'spotify' && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -420,7 +437,6 @@ export default function MusicPage() {
           </motion.div>
         )}
 
-        {/* ============ VIDEOS / CLIPS ============ */}
         {activeTab === 'videos' && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -481,7 +497,6 @@ export default function MusicPage() {
           </motion.div>
         )}
 
-        {/* ============ MY SONGS ============ */}
         {activeTab === 'songs' && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -518,7 +533,6 @@ export default function MusicPage() {
         )}
       </div>
 
-      {/* ============ MODAL ============ */}
       <AnimatePresence>
         {selectedVideo && (
           <motion.div
@@ -595,7 +609,6 @@ export default function MusicPage() {
         )}
       </AnimatePresence>
 
-      {/* ============ FOOTER ============ */}
       <div className="relative z-10 text-center py-12">
         <p className="text-purple-500/30 text-[9px] tracking-widest font-mono inline-block px-4 py-1 border border-purple-950/20">
           [ PIXEL_MATRIX v1.2 — LILITH ]
