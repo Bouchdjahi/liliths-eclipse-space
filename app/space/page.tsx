@@ -51,3 +51,10 @@ export default function SpacePage() {
           {title}
         </motion.h1>
       </div>
+
+      <div className="absolute inset-x-0 bottom-0 top-[110px] z-20 flex items-center justify-center">
+        <CosmicUniverse />
+      </div>
+    </main>
+  );
+}
